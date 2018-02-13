@@ -7,7 +7,7 @@
 #include <assert.h>
 #include "integer.h"
 
-// clear by zero (n[..] = 0, sign = 1)
+// Clear by zero (n[..] = 0, sign = 1)
 void clearByZero(Number *num) {
     int i;
     for (i = 0; i < KETA; i++) {
@@ -16,12 +16,12 @@ void clearByZero(Number *num) {
     setSign(num, 1);
 }
 
-// deep copy to given var
+// Deep copy
 void copyNumber(const Number *from, Number *to) {
     *to = *from;
 }
 
-// display number
+// Display number
 // + 0 0 0 0 0 1 2 3 4 5
 void dispNumber(const Number *num) {
     int i;
@@ -33,7 +33,7 @@ void dispNumber(const Number *num) {
     }
 }
 
-// display number by suppress zero
+// Display number by suppress zero
 // + 1 2 3 4 5
 void dispNumberZeroSuppress(const Number *num) {
     int i;
@@ -50,7 +50,7 @@ void dispNumberZeroSuppress(const Number *num) {
     }
 }
 
-// set random number
+// Set random number
 // num[0..digits] <- random
 void setRand(Number *num, int digits) {
     int i;
@@ -75,7 +75,7 @@ void getAbs(const Number *num, Number *absNum) {
     setSign(absNum, 1);
 }
 
-// check if given number is zero
+// Check if given number is zero
 // Return TRUE  if num == 0
 // Return FALSE if num != 0
 bool isZero(const Number *num) {
@@ -176,13 +176,13 @@ int divBy10(const Number *num, Number *result) {
     return remain;
 }
 
-// Number a, b = b, a
+// Swap a, b
 void swapNumber(Number *a, Number *b) {
     Number tmp;
     tmp = *a; *a = *b; *b = tmp;
 }
 
-// set int value to integer
+// Set int value to Number
 // Return  0 if success
 // Return -1 if cannot set the value x into the num
 int setInt(Number *num, int x) {
@@ -206,9 +206,9 @@ int setInt(Number *num, int x) {
     return 0;
 }
 
-// get int value from integer
+// Get int value from Number
 // Return  0 if success
-// Return -1 if digit number of integer is out of int (DEVELOPMENT)
+// Return -1 if digit number of integer is out of int (TODO)
 int getInt(const Number *num, int *x) {
     int i;
     *x = 0;
@@ -222,6 +222,7 @@ int getInt(const Number *num, int *x) {
     return 0;
 }
 
+// Get str from Number
 void getStr(const Number *num, char* result) {
     int i;
     char buffer[RADIX_LEN + 2];
@@ -254,7 +255,7 @@ int getSign(const Number *num) {
     return num->sign;
 }
 
-// compare a given 2 numbers
+// Compare given 2 numbers
 // Return  1 if num < otherNum
 // Return -1 if num > otherNum
 // Return  0 if num == otherNum
@@ -437,25 +438,14 @@ int decrement(const Number *num, Number *result) {
 }
 
 // result <- a * b
-// this function is too slow to culculate the multiplication.
-// the logic is same as below regarded the type Number as int.
-//
-//     int slowSimpleMultiple(int a, int b, int *result) {
-//         int i;
-//         *result = a;
-//         for (i = 1; i < b; i++) {
-//             *result += a;
-//         }
-//         return 0;
-//     }
-//
+// [deprecated]: This function is too slow to culculate the multiplication.
 int slowMultiplePositiveNumber(const Number *a, const Number *b, Number *result) {
     Number tmp;
     Number i;
     copyNumber(a, result);
-    for (setInt(&i, 1); compNumber(&i, b) < 0; ) {
+    for (setInt(&i, 1); compNumber(&i, b) < 0; ) {      // for (i = 1; i < b; )
         add(result, a, &tmp); copyNumber(&tmp, result); // result += a
-        increment(&i, &tmp); copyNumber(&tmp, &i); // i++
+        increment(&i, &tmp); copyNumber(&tmp, &i);      // i++
     }
     return 0;
 }
@@ -545,23 +535,7 @@ int multiple(const Number *a, const Number *b, Number *result) {
 // Return  0 if success
 // Return -1 if division by zero
 //
-// this function is too slow to culculate the division.
-// the logic is same as below regarded the type Number as int.
-//
-//     int slowDivmod(int x, int y, int *q, int *m) {
-//         int k;
-//         if (y == 0) return -1;
-//         k = 0;
-//         while (1) {
-//             if (x < y) break;
-//             x -= y;
-//             k++;
-//         }
-//         *q = k;
-//         *m = x;
-//         return 0;
-//     }
-//
+// [deprecated]: This function is too slow to culculate the division.
 int slowDivmodPositiveNumber(const Number *_a, const Number *b, Number *q, Number *m) {
     Number tmp;
     Number a = *_a;
@@ -571,8 +545,8 @@ int slowDivmodPositiveNumber(const Number *_a, const Number *b, Number *q, Numbe
     if (isZero(b)) return -1;
 
     while (1) {
-        if (compNumber(&a, b) < 0) break;
-        sub(&a, b, &tmp); copyNumber(&tmp, &a); // a -= b
+        if (compNumber(&a, b) < 0) break;          // if (a < b) break;
+        sub(&a, b, &tmp); copyNumber(&tmp, &a);    // a -= b
         increment(&k, &tmp); copyNumber(&tmp, &k); // k++
     }
     copyNumber(&k, q);
@@ -612,7 +586,6 @@ int divmodPositiveNumber(const Number *a, const Number *b, Number *q, Number *m)
 
         setInt(&next, a->n[i-1]);
 
-        // isZero(&division)
         if (division.n[0] != 0) {
             clearByZero(&num);
             add(&num, &remain, &tmp); copyNumber(&tmp, &num); // num += remain
