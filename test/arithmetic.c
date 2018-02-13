@@ -1,7 +1,5 @@
 #include <stdio.h>
 #include <limits.h>
-
-// KETA = 100
 #include "integer.h"
 
 #define my_assert(expr) \
@@ -12,19 +10,21 @@ void test_add();
 void test_sub();
 void test_mul();
 void test_divmod();
+void test_power();
 
 int main(void) {
     test_add();
     test_sub();
     test_mul();
     test_divmod();
+    test_power();
 
     printf("Finish all tests.\n");
 }
 
 void test_add() {
     printf("* test_add\n");
-    int expected = 12345 + 67890 + 1;
+    int expected = 12345 + 67890;
     int result;
     Number a, b, c;
     clearByZero(&a);
@@ -84,4 +84,19 @@ void test_divmod() {
     getInt(&d, &mod_result);
     my_assert((div_result == div_expected) && "test (2^20 + 4) / 2^4");
     my_assert((mod_result == mod_expected) && "test (2^20 + 4) %% 2^4");
+}
+
+void test_power() {
+    printf("* test_power\n");
+    int expected = pow(2, 20);
+    int result;
+    Number a, b, c;
+    clearByZero(&a);
+    clearByZero(&b);
+    clearByZero(&c);
+    setInt(&a, 2);
+    setInt(&b, 20);
+    power(&a, &b, &c);
+    getInt(&c, &result);
+    my_assert((result == expected) && "test 2^20");
 }
