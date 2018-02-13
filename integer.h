@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+#include <string.h>
 
 // boolean
 typedef int bool;
@@ -14,6 +15,9 @@ typedef int bool;
 #ifndef KETA
 #define KETA 30
 #endif
+
+#define RADIX 10
+#define RADIX_LEN 1
 
 typedef struct NUMBER {
     char n[KETA];
@@ -33,6 +37,7 @@ int divBy10(const Number*, Number*);
 void swapNumber(Number*, Number*);
 int setInt(Number*, int);
 int getInt(const Number*, int*);
+void getStr(const Number*, char*);
 void setSign(Number*, int);
 int getSign(const Number*);
 int compNumber(const Number*, const Number*);

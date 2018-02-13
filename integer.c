@@ -41,12 +41,12 @@ void dispNumberZeroSuppress(const Number *num) {
 
     printf("%c", sign);
 
-    // skip digits that's zero
+    // skip zero digits
     for (i = KETA - 1; num->n[i] == 0 && i != 0; i--)
         ;
 
     for (; i >= 0; i--) {
-        printf("%2d", num->n[i]);
+        printf(" %d", num->n[i]);
     }
 }
 
@@ -115,35 +115,35 @@ int mulBy10(const Number *num, Number *result) {
     return 0;
 }
 
-// result <- num * 10e+exp
-//   where num >= 0, exp >= 0
+// result <- num * 10e+exponent
+//   where num >= 0, exponent >= 0
 // Return  0 if success
-// Return -1 if exp is less than 0
+// Return -1 if exponent is less than 0
 // Return -2 if overflow the result
-int mulBy10E(int exp, const Number *num, Number *result) {
+int mulBy10E(int exponent, const Number *num, Number *result) {
     int i;
     clearByZero(result);
 
-    if (exp < 0) return -1;
+    if (exponent < 0) return -1;
 
-    // result = num where exp == 0 or num == 0
-    if (exp == 0 || isZero(num)) {
+    // result = num where exponent == 0 or num == 0
+    if (exponent == 0 || isZero(num)) {
         copyNumber(num, result);
         return 0;
     }
 
-    for (i = KETA - 1; i >= KETA - exp; i--) {
+    for (i = KETA - 1; i >= KETA - exponent; i--) {
         if (num->n[i] != 0) {
             printf("mulBy10E: overflow\n\n");
             return -2;
         }
     }
 
-    for (i = KETA - 1 - exp; i >= 0; i--) {
-        result->n[i+exp] = num->n[i];
+    for (i = KETA - 1 - exponent; i >= 0; i--) {
+        result->n[i+exponent] = num->n[i];
     }
 
-    for (i = exp - 1; i >= 0; i--) {
+    for (i = exponent - 1; i >= 0; i--) {
         result->n[i] = 0;
     }
 
@@ -220,6 +220,26 @@ int getInt(const Number *num, int *x) {
         *x *= -1;
     }
     return 0;
+}
+
+void getStr(const Number *num, char* result) {
+    int i;
+    char buffer[RADIX_LEN + 2];
+    char str[KETA * RADIX_LEN + 2] = "";
+    char* sign = (getSign(num) < 0) ? "-": "";
+
+    strcat(str, sign);
+
+    // skip zero digits
+    for (i = KETA - 1; num->n[i] == 0 && i != 0; i--)
+        ;
+
+    for (; i >= 0; i--) {
+        sprintf(buffer, "%d", num->n[i]);
+        strcat(str, buffer);
+    }
+
+    strcpy(result, str);
 }
 
 void setSign(Number *num, int sign) {
