@@ -25,11 +25,14 @@ void copyNumber(const Number *from, Number *to) {
 // + 0 0 0 0 0 1 2 3 4 5
 void dispNumber(const Number *num) {
     int i;
+    char format[10];
     char sign = (getSign(num) < 0) ? '-': '+';
+
+    sprintf(format, " %%0%dd", RADIX_LEN);
 
     printf("%c", sign);
     for (i = KETA - 1; i >= 0; i--) {
-        printf("%2d", num->n[i]);
+        printf(format, num->n[i]);
     }
 }
 
@@ -37,16 +40,18 @@ void dispNumber(const Number *num) {
 // + 1 2 3 4 5
 void dispNumberZeroSuppress(const Number *num) {
     int i;
+    char format[10];
     char sign = (getSign(num) < 0) ? '-': '+';
 
-    printf("%c", sign);
+    sprintf(format, " %%0%dd", RADIX_LEN);
 
+    printf("%c", sign);
     // skip zero digits
     for (i = KETA - 1; num->n[i] == 0 && i != 0; i--)
         ;
 
     for (; i >= 0; i--) {
-        printf(" %d", num->n[i]);
+        printf(format, num->n[i]);
     }
 }
 
@@ -63,7 +68,7 @@ void setRand(Number *num, int digits) {
 
     clearByZero(num);
     for (i = 0; i < digits; i++) {
-        num->n[i] = random() % 10;
+        num->n[i] = random() % RADIX;
     }
     sign = (random() % 2 == 0) ? 1: -1;
     setSign(num, sign);
@@ -92,23 +97,30 @@ bool isZero(const Number *num) {
 // Return -1 if overflow the result
 int mulBy10(const Number *num, Number *result) {
     int i;
+    int leftDigit, currentDigit;
     clearByZero(result);
 
-    // result = num where num == 0
+    // result = num if num == 0
     if (isZero(num)) {
         copyNumber(num, result);
         return 0;
     }
 
-    if (num->n[KETA-1] != 0) {
+    i = KETA - 1;
+    leftDigit    = num->n[i] * 10 / RADIX;
+    currentDigit = num->n[i] * 10 % RADIX;
+    result->n[i] = currentDigit;
+    if (leftDigit > 0) {
         printf("mulBy10: overflow\n\n");
         return -1;
     }
 
     for (i = KETA - 2; i >= 0; i--) {
-        result->n[i+1] = num->n[i];
+        leftDigit    = num->n[i] * 10 / RADIX;
+        currentDigit = num->n[i] * 10 % RADIX;
+        result->n[i+1] += leftDigit;
+        result->n[i  ] = currentDigit;
     }
-    result->n[0] = 0;
 
     setSign(result, getSign(num));
 
@@ -122,30 +134,22 @@ int mulBy10(const Number *num, Number *result) {
 // Return -2 if overflow the result
 int mulBy10E(int exponent, const Number *num, Number *result) {
     int i;
+    Number tmp, tmpResult;
     clearByZero(result);
 
     if (exponent < 0) return -1;
 
-    // result = num where exponent == 0 or num == 0
+    // result = num if exponent == 0 or num == 0
     if (exponent == 0 || isZero(num)) {
         copyNumber(num, result);
         return 0;
     }
 
-    for (i = KETA - 1; i >= KETA - exponent; i--) {
-        if (num->n[i] != 0) {
-            printf("mulBy10E: overflow\n\n");
-            return -2;
-        }
+    copyNumber(num, &tmpResult);
+    for (i = 0; i < exponent; i++) {
+        mulBy10(&tmpResult, &tmp); copyNumber(&tmp, &tmpResult);
     }
-
-    for (i = KETA - 1 - exponent; i >= 0; i--) {
-        result->n[i+exponent] = num->n[i];
-    }
-
-    for (i = exponent - 1; i >= 0; i--) {
-        result->n[i] = 0;
-    }
+    copyNumber(&tmpResult, result);
 
     setSign(result, getSign(num));
 
@@ -157,6 +161,7 @@ int mulBy10E(int exponent, const Number *num, Number *result) {
 int divBy10(const Number *num, Number *result) {
     int i;
     int remain;
+    int leftDigit, currentDigit;
     clearByZero(result);
 
     if (isZero(num)) {
@@ -164,12 +169,24 @@ int divBy10(const Number *num, Number *result) {
         return 0;
     }
 
-    remain = num->n[0];
+    // remain = num->n[0];
+    //
+    // for (i = 1; i < KETA; i++) {
+    //     result->n[i-1] = num->n[i];
+    // }
+    // result->n[KETA-1] = 0;
+    //
+    remain = num->n[0] % 10;
 
-    for (i = 1; i < KETA; i++) {
-        result->n[i-1] = num->n[i];
+    for (i = 0; i < KETA - 1; i++) {
+        leftDigit    = num->n[i+1] % 10;
+        currentDigit = leftDigit * (RADIX / 10) + num->n[i] / 10;
+        result->n[i] = currentDigit;
     }
-    result->n[KETA-1] = 0;
+
+    i = KETA - 1;
+    currentDigit = num->n[i] / 10;
+    result->n[i] = currentDigit;
 
     setSign(result, getSign(num));
 
@@ -198,10 +215,10 @@ int setInt(Number *num, int x) {
     while (1) {
         // break if overflow
         if (i >= KETA) return -1;
-        num->n[i++] = x % 10;
+        num->n[i++] = x % RADIX;
         // break if finish
-        if (x / 10 == 0) break;
-        x /= 10;
+        if (x / RADIX == 0) break;
+        x /= RADIX;
     }
     return 0;
 }
@@ -214,7 +231,7 @@ int getInt(const Number *num, int *x) {
     *x = 0;
 
     for (i = 0; i < KETA; i++) {
-        *x += num->n[i] * (int)pow(10.0, i);
+        *x += num->n[i] * (int)pow(RADIX, i);
     }
     if (getSign(num) == -1) {
         *x *= -1;
@@ -225,9 +242,14 @@ int getInt(const Number *num, int *x) {
 // Get str from Number
 void getStr(const Number *num, char* result) {
     int i;
+    char format[10];
+    char formatSuffix[10];
     char buffer[RADIX_LEN + 2];
     char str[KETA * RADIX_LEN + 2] = "";
     char* sign = (getSign(num) < 0) ? "-": "";
+
+    sprintf(format, "%%0%dd", RADIX_LEN);
+    sprintf(formatSuffix, "%%d");
 
     strcat(str, sign);
 
@@ -235,8 +257,14 @@ void getStr(const Number *num, char* result) {
     for (i = KETA - 1; num->n[i] == 0 && i != 0; i--)
         ;
 
+    // Get first digit without 0 padding.
+    sprintf(buffer, formatSuffix, num->n[i]);
+    strcat(str, buffer);
+    i--;
+
+    // Get rest of the digits
     for (; i >= 0; i--) {
-        sprintf(buffer, "%d", num->n[i]);
+        sprintf(buffer, format, num->n[i]);
         strcat(str, buffer);
     }
 
@@ -289,14 +317,18 @@ int compNumber(const Number *num, const Number *otherNum) {
 // Return  0 if successed
 // Return -1 if overflow
 int addPositiveNumber(const Number *a, const Number *b, Number *result) {
-    int i;
+    int i, iMax;
     int carry = 0;
     clearByZero(result);
 
-    for (i = 0; i < KETA; i++) {
+    // to ignore prefix 0 digits
+    for (i = KETA - 1; i != 0 && a->n[i-1] == 0 && b->n[i-1] == 0; i--) ;
+    iMax = (i + 1 >= KETA - 1) ? KETA - 1 : i + 1;
+
+    for (i = 0; i <= iMax; i++) {
         int sum = a->n[i] + b->n[i] + carry;
-        result->n[i] = sum % 10;
-        carry = (sum >= 10) ? 1: 0;
+        result->n[i] = sum % RADIX;
+        carry = (sum >= RADIX) ? 1: 0;
     }
 
     // if overflow
@@ -309,15 +341,13 @@ int addPositiveNumber(const Number *a, const Number *b, Number *result) {
 // Return  0 if successed
 // Return -1 if underflow
 int subPositiveNumber(const Number *_a, const Number *_b, Number *result) {
-    int i;
+    int i, iMax;
     int borrow = 0;
     Number a, b;
-
     clearByZero(result);
 
     // a must be bigger than b
-    // if _a < _b
-    if (compNumber(_a, _b) < 0) {
+    if (compNumber(_a, _b) < 0) { // if _a < _b
         a = *_b;
         b = *_a;
         setSign(result, -1); // flag negative
@@ -326,8 +356,12 @@ int subPositiveNumber(const Number *_a, const Number *_b, Number *result) {
         b = *_b;
     }
 
+    // to ignore prefix 0 digits
+    for (i = KETA - 1; i != 0 && a.n[i-1] == 0 && b.n[i-1] == 0; i--) ;
+    iMax = (i + 1 >= KETA - 1) ? KETA - 1 : i + 1;
+
     // compute diff
-    for (i = 0; i < KETA; i++) {
+    for (i = 0; i <= iMax; i++) {
         int ai = a.n[i] - borrow;
         int bi = b.n[i];
         int diff;
@@ -336,7 +370,7 @@ int subPositiveNumber(const Number *_a, const Number *_b, Number *result) {
             diff = ai - bi;
         } else {
             borrow = 1;
-            diff = 10 + ai - bi;
+            diff = RADIX + ai - bi;
         }
         result->n[i] = diff;
     }
@@ -455,7 +489,9 @@ int slowMultiplePositiveNumber(const Number *a, const Number *b, Number *result)
 // Return  0 if success
 // Return -1 if overflow
 int multiplePositiveNumber(const Number *a, const Number *b, Number *result) {
+    int i;
     int ai, bi;
+    int aiMax, biMax;
     int carry = 0;
     int r; // return value
     Number tmp;
@@ -463,7 +499,13 @@ int multiplePositiveNumber(const Number *a, const Number *b, Number *result) {
     clearByZero(result);
     clearByZero(&tmpResult);
 
-    for (bi = 0; bi < KETA-1; bi++) {
+    // to ignore prefix 0 digits
+    for (i = KETA - 1; i != 0 && a->n[i-1] == 0; i--) ;
+    aiMax = i;
+    for (i = KETA - 1; i != 0 && b->n[i-1] == 0; i--) ;
+    biMax = i;
+
+    for (bi = 0; bi <= biMax; bi++) {
         Number d;
         clearByZero(&d);
 
@@ -471,14 +513,14 @@ int multiplePositiveNumber(const Number *a, const Number *b, Number *result) {
         if (b->n[bi] == 0) continue;
 
         // d_ai = a_ai * b_bi
-        for (ai = 0; ai < KETA-1; ai++) {
+        for (ai = 0; ai <= aiMax; ai++) {
             int mul = a->n[ai] * b->n[bi] + carry;
-            d.n[ai] = mul % 10;
-            carry   = mul / 10;
+            d.n[ai] = mul % RADIX;
+            carry   = mul / RADIX;
         }
 
-        // d *= 10 ** bi
-        r = mulBy10E(bi, &d, &tmp);
+        // d *= 10 ** (bi * RADIX_LEN)
+        r = mulBy10E(bi * RADIX_LEN, &d, &tmp);
         if (r != 0) return -1; // overflow
         copyNumber(&tmp, &d);
 
@@ -564,9 +606,11 @@ int divmodPositiveNumber(const Number *a, const Number *b, Number *q, Number *m)
     int begin;
     Number tmp;
     Number num; // store a midway state of division
+    Number divisor = *b;
     Number division, remain;
     Number result;
     Number next;
+    bool useInt = FALSE;
     clearByZero(&num);
     clearByZero(&result);
     clearByZero(&next);
@@ -579,7 +623,7 @@ int divmodPositiveNumber(const Number *a, const Number *b, Number *q, Number *m)
     setInt(&num, a->n[begin]);
 
     while (i >= 0) {
-        slowDivmodPositiveNumber(&num, b, &division, &remain);
+        slowDivmodPositiveNumber(&num, &divisor, &division, &remain);
 
         result.n[i] = division.n[0];
         if (i == 0) break;
@@ -591,7 +635,7 @@ int divmodPositiveNumber(const Number *a, const Number *b, Number *q, Number *m)
             add(&num, &remain, &tmp); copyNumber(&tmp, &num); // num += remain
         }
 
-        mulBy10(&num, &tmp); copyNumber(&tmp, &num); // num *= 10
+        mulBy10E(RADIX_LEN, &num, &tmp); copyNumber(&tmp, &num); // num *= 10
         add(&num, &next, &tmp); copyNumber(&tmp, &num); // num += next
 
         i--;
@@ -700,7 +744,7 @@ bool isPrime(const Number *_num) {
     Number remain;
     setInt(&zero, 0);
     setInt(&two, 2);
-    setInt(&division, 3);
+    setInt(&division, 1);
     clearByZero(&remain);
 
     divmod(&num, &two, &max, &_);
@@ -710,14 +754,14 @@ bool isPrime(const Number *_num) {
     }
 
     while (1) {
+        add(&division, &two, &tmp); copyNumber(&tmp, &division); // division += 2
+
         if (compNumber(&division, &max) >= 0) break;
 
         divmod(&num, &division, &_, &remain);
         if (compNumber(&remain, &zero) == 0) {
             return FALSE;
         }
-
-        add(&division, &two, &tmp); copyNumber(&tmp, &division); // division += 2
     }
 
     return TRUE;
@@ -809,6 +853,7 @@ int slowSqrtNumber(const Number *num, Number *result) {
 //   where num >= 0
 // Return  0 if success
 // Return -1 if num < 0
+// Calculate sqrt with Newton-Raphson method.
 int sqrtNumber(const Number *num, Number *result) {
     int i;
     Number _;

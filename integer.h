@@ -6,6 +6,7 @@
 #include <time.h>
 #include <math.h>
 #include <string.h>
+#include <limits.h>
 
 // boolean
 typedef int bool;
@@ -16,8 +17,12 @@ typedef int bool;
 #define KETA 30
 #endif
 
+#ifndef RADIX
 #define RADIX 10
+#endif
+#ifndef RADIX_LEN
 #define RADIX_LEN 1
+#endif
 
 typedef struct NUMBER {
     char n[KETA];
