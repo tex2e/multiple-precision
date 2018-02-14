@@ -600,45 +600,57 @@ int slowDivmodPositiveNumber(const Number *_a, const Number *b, Number *q, Numbe
 // Return  0 if success
 // Return -1 if division by zero (b == 0)
 int divmodPositiveNumber(const Number *a, const Number *b, Number *q, Number *m) {
-    int i;
-    int begin;
+    int i, j;
+    int iMax, jMax;
+    int next_;
     Number tmp;
     Number num; // store a midway state of division
     Number divisor = *b;
     Number division, remain;
     Number result;
     Number next;
-    bool useInt = FALSE;
     clearByZero(&num);
     clearByZero(&result);
     clearByZero(&next);
 
     if (isZero(b)) return -1;
 
+    // to ignore prefix 0 digits
     for (i = KETA - 1; a->n[i] == 0 && i >= 0; i--) {}
-    begin = i;
+    iMax = i;
 
-    setInt(&num, a->n[begin]);
+    jMax = RADIX_LEN - 1;
 
-    while (i >= 0) {
-        // 筆算方式の割り算では各桁で割り算を行うが、その商は10未満なので遅い割り算でも問題ない
-        // ただし基数が10より大きい場合は、これに当てはまらない
-        slowDivmodPositiveNumber(&num, &divisor, &division, &remain);
+    // get first digit
+    setInt(&num, a->n[iMax] / (int)pow(10, jMax));
 
-        result.n[i] = division.n[0];
-        if (i == 0) break;
+    for (i = iMax; i >= 0; i--) {
+        for (j = jMax; j >= 0; j--) {
+            // num / divisor = division ... remain
+            // division is between 0 and 9.
+            // So, using slow divmod algorithm at this time is not problem.
+            slowDivmodPositiveNumber(&num, &divisor, &division, &remain);
 
-        setInt(&next, a->n[i-1]);
+            result.n[i] += division.n[0] * (int)pow(10, j);
 
-        if (division.n[0] != 0) {
-            clearByZero(&num);
-            add(&num, &remain, &tmp); copyNumber(&tmp, &num); // num += remain
+            // break if last digit
+            if (i == 0 && j == 0) break;
+
+            // get next (right) digit
+            if (j == 0) {
+                next_ = a->n[i-1] / (int)pow(10, jMax);
+            } else {
+                next_ = a->n[i] / (int)pow(10, j-1) % 10;
+            }
+            setInt(&next, next_);
+
+            // num = remain * 10 + next
+            if (division.n[0] != 0) {
+                copyNumber(&remain, &num); // num = remain
+            }
+            mulBy10(&num, &tmp); copyNumber(&tmp, &num); // num *= 10
+            add(&num, &next, &tmp); copyNumber(&tmp, &num); // num += next
         }
-
-        mulBy10E(RADIX_LEN, &num, &tmp); copyNumber(&tmp, &num); // num *= 10
-        add(&num, &next, &tmp); copyNumber(&tmp, &num); // num += next
-
-        i--;
     }
 
     copyNumber(&result, q);
@@ -648,7 +660,7 @@ int divmodPositiveNumber(const Number *a, const Number *b, Number *q, Number *m)
 
 // a / b = quo ... mod
 // Return  0 if success
-// Return -1 if division by zero (b == 0)
+// Return -1 if divided by zero (b == 0)
 int divmod(const Number *a, const Number *b, Number *quo, Number *mod) {
     int r = 0;
     bool plusA = (getSign(a) == 1);

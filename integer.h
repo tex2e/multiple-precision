@@ -25,7 +25,7 @@ typedef int bool;
 #endif
 
 typedef struct NUMBER {
-    char n[KETA];
+    int n[KETA];
     char sign;
 } Number;
 
