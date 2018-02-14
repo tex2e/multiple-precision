@@ -13,19 +13,46 @@ typedef int bool;
 #define FALSE 0
 #define TRUE (!FALSE)
 
+// digit size
+// Total digit size is KETA * RADIX_LEN
+// To change this, gives -D KETA=<number> to gcc.
 #ifndef KETA
-#define KETA 30
+#define KETA 100
 #endif
 
+// digit_t   |    int     |        long
+// ----------+------------+--------------------
+// digit_max | 2147483647 | 9223372036854775807
+// RADIX     |      10000 |          1000000000
+// RADIX_LEN |          4 |                   9
+//
+// RADIX=10 means it uses the ten digits from 0 through 9.
+// RADIX=10000 means it uses the thousand digits from 0000 through 9999.
+// RADIX_LEN is the number of RADIX width.
+// To change these, gives -D RADIX=1000000000 and -D RADIX_LEN=9 to gcc.
 #ifndef RADIX
-#define RADIX 10
+#define RADIX 10000
 #endif
 #ifndef RADIX_LEN
-#define RADIX_LEN 1
+#define RADIX_LEN 4
+#endif
+
+// Use "long" or "int" as digit type.
+// To use long, gives -D NUMBER_DIGIT_LONG=TRUE to gcc.
+#ifdef NUMBER_DIGIT_LONG
+// long
+#define digit_t long
+#define div ldiv
+#define div_t ldiv_t
+#define digit_max LONG_MAX
+#else
+// int
+#define digit_t int
+#define digit_max INT_MAX
 #endif
 
 typedef struct NUMBER {
-    int n[KETA];
+    digit_t n[KETA];
     char sign;
 } Number;
 

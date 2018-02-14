@@ -97,7 +97,7 @@ bool isZero(const Number *num) {
 // Return -1 if overflow the result
 int mulBy10(const Number *num, Number *result) {
     int i;
-    int leftDigit, currentDigit;
+    digit_t leftDigit, currentDigit;
     div_t divResult;
     clearByZero(result);
 
@@ -163,8 +163,8 @@ int mulBy10E(int exponent, const Number *num, Number *result) {
 // Return num % 10
 int divBy10(const Number *num, Number *result) {
     int i;
-    int remain;
-    int leftDigit, currentDigit;
+    digit_t remain;
+    digit_t leftDigit, currentDigit;
     clearByZero(result);
 
     if (isZero(num)) {
@@ -227,7 +227,7 @@ int getInt(const Number *num, int *x) {
     *x = 0;
 
     for (i = 0; i < KETA; i++) {
-        *x += num->n[i] * (int)pow(RADIX, i);
+        *x += num->n[i] * (digit_t)pow(RADIX, i);
     }
     if (getSign(num) == -1) {
         *x *= -1;
@@ -322,7 +322,7 @@ int addPositiveNumber(const Number *a, const Number *b, Number *result) {
     iMax = (i + 1 >= KETA - 1) ? KETA - 1 : i + 1;
 
     for (i = 0; i <= iMax; i++) {
-        int sum = a->n[i] + b->n[i] + carry;
+        digit_t sum = a->n[i] + b->n[i] + carry;
         result->n[i] = sum % RADIX;
         carry = (sum >= RADIX) ? 1: 0;
     }
@@ -358,9 +358,9 @@ int subPositiveNumber(const Number *_a, const Number *_b, Number *result) {
 
     // compute diff
     for (i = 0; i <= iMax; i++) {
-        int ai = a.n[i] - borrow;
-        int bi = b.n[i];
-        int diff;
+        digit_t ai = a.n[i] - borrow;
+        digit_t bi = b.n[i];
+        digit_t diff;
         if (ai >= bi) {
             borrow = 0;
             diff = ai - bi;
@@ -511,7 +511,7 @@ int multiplePositiveNumber(const Number *a, const Number *b, Number *result) {
 
         // d_ai = a_ai * b_bi
         for (ai = 0; ai <= aiMax; ai++) {
-            int mul = a->n[ai] * b->n[bi] + carry;
+            digit_t mul = a->n[ai] * b->n[bi] + carry;
             divResult = div(mul, RADIX);
             d.n[ai]   = divResult.rem;  // mul % RADIX
             carry     = divResult.quot; // mul / RADIX
@@ -565,7 +565,7 @@ int multiple(const Number *a, const Number *b, Number *result) {
     }
 
     if (r == -1) {
-        printf("multiple: underflow the result\n\n");
+        printf("multiple: overflow the result\n\n");
     }
     return r;
 }
@@ -622,7 +622,7 @@ int divmodPositiveNumber(const Number *a, const Number *b, Number *q, Number *m)
     jMax = RADIX_LEN - 1;
 
     // get first digit
-    setInt(&num, a->n[iMax] / (int)pow(10, jMax));
+    setInt(&num, a->n[iMax] / (digit_t)pow(10, jMax));
 
     for (i = iMax; i >= 0; i--) {
         for (j = jMax; j >= 0; j--) {
@@ -631,16 +631,16 @@ int divmodPositiveNumber(const Number *a, const Number *b, Number *q, Number *m)
             // So, using slow divmod algorithm at this time is not problem.
             slowDivmodPositiveNumber(&num, &divisor, &division, &remain);
 
-            result.n[i] += division.n[0] * (int)pow(10, j);
+            result.n[i] += division.n[0] * (digit_t)pow(10, j);
 
             // break if last digit
             if (i == 0 && j == 0) break;
 
             // get next (right) digit
             if (j == 0) {
-                next_ = a->n[i-1] / (int)pow(10, jMax);
+                next_ = a->n[i-1] / (digit_t)pow(10, jMax);
             } else {
-                next_ = a->n[i] / (int)pow(10, j-1) % 10;
+                next_ = a->n[i] / (digit_t)pow(10, j-1) % 10;
             }
             setInt(&next, next_);
 
