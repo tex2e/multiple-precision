@@ -98,6 +98,7 @@ bool isZero(const Number *num) {
 int mulBy10(const Number *num, Number *result) {
     int i;
     int leftDigit, currentDigit;
+    div_t divResult;
     clearByZero(result);
 
     // result = num if num == 0
@@ -107,8 +108,9 @@ int mulBy10(const Number *num, Number *result) {
     }
 
     i = KETA - 1;
-    leftDigit    = num->n[i] * 10 / RADIX;
-    currentDigit = num->n[i] * 10 % RADIX;
+    divResult    = div(num->n[i] * 10, RADIX);
+    leftDigit    = divResult.quot; // num->n[i] * 10 / RADIX;
+    currentDigit = divResult.rem;  // num->n[i] * 10 % RADIX;
     result->n[i] = currentDigit;
     if (leftDigit > 0) {
         printf("mulBy10: overflow\n\n");
@@ -116,8 +118,9 @@ int mulBy10(const Number *num, Number *result) {
     }
 
     for (i = KETA - 2; i >= 0; i--) {
-        leftDigit    = num->n[i] * 10 / RADIX;
-        currentDigit = num->n[i] * 10 % RADIX;
+        divResult    = div(num->n[i] * 10, RADIX);
+        leftDigit    = divResult.quot; // num->n[i] * 10 / RADIX;
+        currentDigit = divResult.rem;  // num->n[i] * 10 % RADIX;
         result->n[i+1] += leftDigit;
         result->n[i  ] = currentDigit;
     }
@@ -169,13 +172,6 @@ int divBy10(const Number *num, Number *result) {
         return 0;
     }
 
-    // remain = num->n[0];
-    //
-    // for (i = 1; i < KETA; i++) {
-    //     result->n[i-1] = num->n[i];
-    // }
-    // result->n[KETA-1] = 0;
-    //
     remain = num->n[0] % 10;
 
     for (i = 0; i < KETA - 1; i++) {
@@ -494,6 +490,7 @@ int multiplePositiveNumber(const Number *a, const Number *b, Number *result) {
     int aiMax, biMax;
     int carry = 0;
     int r; // return value
+    div_t divResult;
     Number tmp;
     Number tmpResult;
     clearByZero(result);
@@ -515,8 +512,9 @@ int multiplePositiveNumber(const Number *a, const Number *b, Number *result) {
         // d_ai = a_ai * b_bi
         for (ai = 0; ai <= aiMax; ai++) {
             int mul = a->n[ai] * b->n[bi] + carry;
-            d.n[ai] = mul % RADIX;
-            carry   = mul / RADIX;
+            divResult = div(mul, RADIX);
+            d.n[ai]   = divResult.rem;  // mul % RADIX
+            carry     = divResult.quot; // mul / RADIX
         }
 
         // d *= 10 ** (bi * RADIX_LEN)
@@ -623,6 +621,8 @@ int divmodPositiveNumber(const Number *a, const Number *b, Number *q, Number *m)
     setInt(&num, a->n[begin]);
 
     while (i >= 0) {
+        // 筆算方式の割り算では各桁で割り算を行うが、その商は10未満なので遅い割り算でも問題ない
+        // ただし基数が10より大きい場合は、これに当てはまらない
         slowDivmodPositiveNumber(&num, &divisor, &division, &remain);
 
         result.n[i] = division.n[0];
