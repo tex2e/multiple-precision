@@ -16,6 +16,8 @@ void test_divmod();
 void test_divmod_big();
 void test_power();
 void test_power_big();
+void test_isPrime();
+void test_factorialNumber();
 
 int main(void) {
     test_add();
@@ -28,6 +30,8 @@ int main(void) {
     test_divmod_big();
     test_power();
     test_power_big();
+    test_isPrime();
+    test_factorialNumber();
 
     printf("Finish all tests.\n");
 }
@@ -163,4 +167,24 @@ void test_power_big() {
     power(&a, &b, &c);
     getStr(&c, result);
     my_assert((strcmp(result, expected) == 0) && "test 123 ** 45");
+}
+
+void test_isPrime() {
+    printf("* test_isPrime\n");
+    Number a, b;
+    setInt(&a, 1234567);
+    setInt(&b, 127);
+    my_assert(!isPrime(&a) && "test !isPrime(1234567)");
+    my_assert(isPrime(&b) && "test isPrime(127)");
+}
+
+void test_factorialNumber() {
+    printf("* test_factorialNumber\n");
+    char* expected = "3628800";
+    char result[KETA * RADIX_LEN + 2];
+    Number a, b;
+    setInt(&a, 10);
+    factorialNumber(&a, &b);
+    getStr(&b, result);
+    my_assert((strcmp(result, expected) == 0) && "test 10!");
 }
