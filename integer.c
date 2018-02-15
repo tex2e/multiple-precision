@@ -130,7 +130,7 @@ int mulBy10(const Number *num, Number *result) {
     return 0;
 }
 
-// result <- num * 10e+exponent
+// result <- num * 1e+exponent
 //   where num >= 0, exponent >= 0
 // Return  0 if success
 // Return -1 if exponent is less than 0
@@ -187,6 +187,35 @@ int divBy10(const Number *num, Number *result) {
     setSign(result, getSign(num));
 
     return remain;
+}
+
+// result <- num / 1e+exponent
+//   where num >= 0, exponent >= 0
+// Return  0 if success
+// Return -1 if exponent is less than 0
+// Return -2 if overflow the result
+int divBy10E(int exponent, const Number *num, Number *result) {
+    int i;
+    Number tmp, tmpResult;
+    clearByZero(result);
+
+    if (exponent < 0) return -1;
+
+    // result = num if exponent == 0 or num == 0
+    if (exponent == 0 || isZero(num)) {
+        copyNumber(num, result);
+        return 0;
+    }
+
+    copyNumber(num, &tmpResult);
+    for (i = 0; i < exponent; i++) {
+        divBy10(&tmpResult, &tmp); copyNumber(&tmp, &tmpResult);
+    }
+    copyNumber(&tmpResult, result);
+
+    setSign(result, getSign(num));
+
+    return 0;
 }
 
 // Swap a, b
