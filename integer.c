@@ -644,6 +644,12 @@ int divmodPositiveNumber(const Number *a, const Number *b, Number *q, Number *m)
 
     if (isZero(b)) return -1;
 
+    if (compNumber(a, b) < 0) {
+        setInt(q, 0);
+        copyNumber(a, m);
+        return 0;
+    }
+
     // to ignore prefix 0 digits
     for (i = KETA - 1; a->n[i] == 0 && i >= 0; i--) {}
     iMax = i;
@@ -720,6 +726,96 @@ int divmod(const Number *a, const Number *b, Number *quo, Number *mod) {
     } else if (!plusA && !plusB) {
         r = divmodPositiveNumber(&absA, &absB, quo, mod);
         setSign(mod, -1);
+    } else {
+        assert(FALSE); // this block cannot be reached
+    }
+
+    return r;
+}
+
+// a / b = q ... m
+//   where a >= 0, b >= 0, b is instance of int
+// Return  0 if success
+// Return -1 if division by zero (b == 0)
+int divmodPositiveNumberByInt(const Number *a, const digit_t *b, Number *q, digit_t *m) {
+    int i, j;
+    int begin;
+    Number tmp;
+    digit_t num; // store a midway state of division
+    digit_t divisor = *b;
+    digit_t division, remain;
+    digit_t next;
+    Number result;
+    num = 0;
+    next = 0;
+    clearByZero(&result);
+
+    if (b == 0) return -1;
+
+    // to ignore prefix 0 digits
+    for (i = KETA - 1; a->n[i] == 0 && i >= 0; i--) {}
+    begin = i;
+
+    // get first digit
+    num = a->n[begin];
+
+    while (i >= 0) {
+        div_t divResult = div(num, divisor);
+        division = divResult.quot;
+        remain   = divResult.rem;
+
+        // printf("%i) %ld ... %ld\n", i, division, remain);
+
+        result.n[i] = division;
+        if (i == 0) break;
+
+        // get next (right) digit
+        next = a->n[i-1];
+
+        // num = remain * 1e+RADIX_LEN + next
+        num = remain * RADIX + next;
+
+        i--;
+    }
+
+    copyNumber(&result, q);
+    *m = remain;
+    return 0;
+}
+
+// a / b = quo ... mod
+// Return  0 if success
+// Return -1 if divided by zero (b == 0)
+int divmodByInt(const Number *a, const digit_t *b, Number *quo, digit_t *mod) {
+    int r = 0;
+    bool plusA = (getSign(a) == 1);
+    bool plusB = (b >= 0);
+    Number absA;
+    digit_t absB;
+    getAbs(a, &absA);
+    absB = (plusB) ? *b: -(*b);
+
+    // there are 4 cases
+    //   1. +a / +b  =>     a  /  b    => div(a, b)
+    //      +a % +b  =>     a  %  b    => mod(a, b)
+    //   2. +a / -b  =>  -( a  / |b|)  => setSign(div(a, getAbs(b)), -1)
+    //      +a % -b  =>     a  % |b|   =>         mod(a, getAbs(b))
+    //   3. -a / +b  =>  -(|a| /  b )  => setSign(div(getAbs(a), b), -1)
+    //      -a % +b  =>  -(|a| %  b )  => setSign(mod(getAbs(a), b), -1)
+    //   4. -a / -b  =>    |a| / |b|   =>         div(getAbs(a), getAbs(b))
+    //      -a % -b  =>  -(|a| % |b|)  => setSign(mod(getAbs(a), getAbs(b)), -1)
+    if (plusA && plusB) {
+        r = divmodPositiveNumberByInt(a, b, quo, mod);
+    } else if (plusA && !plusB) {
+        r = divmodPositiveNumberByInt(a, &absB, quo, mod);
+        setSign(quo, -1);
+    } else if (!plusA && plusB) {
+        r = divmodPositiveNumberByInt(&absA, b, quo, mod);
+        setSign(quo, -1);
+        *mod *= -1;
+    } else if (!plusA && !plusB) {
+        r = divmodPositiveNumberByInt(&absA, &absB, quo, mod);
+        *mod *= -1;
     } else {
         assert(FALSE); // this block cannot be reached
     }
