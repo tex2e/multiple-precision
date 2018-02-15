@@ -66,6 +66,7 @@ bool isZero(const Number*);
 int mulBy10(const Number*, Number*);
 int mulBy10E(int, const Number*, Number*);
 int divBy10(const Number*, Number*);
+int divBy10E(int, const Number*, Number*);
 void swapNumber(Number*, Number*);
 int setInt(Number*, int);
 int getInt(const Number*, int*);
@@ -85,11 +86,14 @@ int multiple(const Number*, const Number*, Number*);
 int slowDivmodPositiveNumber(const Number*, const Number*, Number*, Number*);
 int divmodPositiveNumber(const Number*, const Number*, Number*, Number*);
 int divmod(const Number*, const Number*, Number*, Number*);
+int divmodPositiveNumberByInt(const Number*, const digit_t*, Number*, digit_t*);
+int divmodByInt(const Number*, const digit_t*, Number*, digit_t*);
 int power(const Number*, const Number*, Number*);
 bool isPrime(const Number*);
 int factorialNumber(const Number*, Number*);
 int gcdNumber(const Number*, const Number*, Number*);
 int lcmNumber(const Number*, const Number*, Number*);
 int sqrtNumber(const Number*, Number*);
+int arctan(int, int, Number*);
 
 #endif
