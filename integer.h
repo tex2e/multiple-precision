@@ -30,13 +30,7 @@ typedef int bool;
 // RADIX=10000 means it uses the thousand digits from 0000 through 9999.
 // RADIX_LEN is the number of RADIX width.
 // To change these, gives -D RADIX=1000000000 and -D RADIX_LEN=9 to gcc.
-#ifndef RADIX
-#define RADIX 10000
-#endif
-#ifndef RADIX_LEN
-#define RADIX_LEN 4
-#endif
-
+//
 // Use "long" or "int" as digit type.
 // To use long, gives -D NUMBER_DIGIT_LONG=TRUE to gcc.
 #ifdef NUMBER_DIGIT_LONG
@@ -45,10 +39,22 @@ typedef int bool;
 #define div ldiv
 #define div_t ldiv_t
 #define digit_max LONG_MAX
+#ifndef RADIX
+#define RADIX 1000000000
+#endif
+#ifndef RADIX_LEN
+#define RADIX_LEN 9
+#endif
 #else
 // int
 #define digit_t int
 #define digit_max INT_MAX
+#ifndef RADIX
+#define RADIX 10000
+#endif
+#ifndef RADIX_LEN
+#define RADIX_LEN 4
+#endif
 #endif
 
 typedef struct NUMBER {

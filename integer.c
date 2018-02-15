@@ -1031,30 +1031,31 @@ int sqrtNumber(const Number *num, Number *result) {
 //
 //           ans = arctan(1/x)
 //           ans = 1/1(1/x)^1 - 1/3(1/x)^3 + 1/5(1/x)^5 - 1/7(1/x)^7 + ...
-//   10^1100 ans = 10^1100/1(1/8)^1 - 10^1100/2(1/8)^3 + 10^1100/5(1/8)^5 - ...
+//   10^1100 ans = 10^1100/1(1/x)^1 - 10^1100/3(1/x)^3 + 10^1100/5(1/x)^5 - ...
 //
 int arctan(int x, int digits, Number *result) {
     int i;
     int sign;
     Number tmp, _;
+    Number x_;
     Number step, quot;
     Number numer, denom; // numer/denom
     Number denom1, denom2;
     Number sum;
-    Number one, two, ten;
+    Number one, two;
     setInt(&one, 1);
     setInt(&two, 2);
-    setInt(&ten, 10);
     clearByZero(&sum);
     clearByZero(result);
 
-    mulBy10E(digits, &ten, &numer);
+    mulBy10E(digits, &one, &numer); // numer = 1e+digits
 
     sign = 1;
-    setInt(&step, x * x);
+    setInt(&x_, x);
+    multiple(&x_, &x_, &step); // step = x * x
     setInt(&denom1, 1);
     setInt(&denom2, x);
-    copyNumber(&denom2, &denom);
+    copyNumber(&denom2, &denom); // denom = 1 * x
     while (1) {
         if (compNumber(&denom, &numer) > 0) break;
         multiple(&denom1, &denom2, &denom); // denom = denom1 * denom2
@@ -1068,7 +1069,6 @@ int arctan(int x, int digits, Number *result) {
     }
 
     copyNumber(&sum, result);
-    dispNumberZeroSuppress(result); putchar('\n');
 
     return 0;
 }
