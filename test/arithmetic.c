@@ -14,6 +14,8 @@ void test_mul();
 void test_mul_big();
 void test_divmod();
 void test_divmod_big();
+void test_divmodByInt();
+void test_divmodByInt_big();
 void test_power();
 void test_power_big();
 void test_isPrime();
@@ -28,6 +30,8 @@ int main(void) {
     test_mul_big();
     test_divmod();
     test_divmod_big();
+    test_divmodByInt(); // private method
+    test_divmodByInt_big(); // private method
     test_power();
     test_power_big();
     test_isPrime();
@@ -142,6 +146,41 @@ void test_divmod_big() {
     getStr(&d, mod_result);
     my_assert((strcmp(div_result, div_expected) == 0) && "test 12345E100 / 67890E50");
     my_assert((strcmp(mod_result, mod_expected) == 0) && "test 12345E100 %% 67890E50");
+}
+
+void test_divmodByInt() {
+    printf("* test_divmodByInt\n");
+    int div_expected = 18;
+    int div_result;
+    digit_t mod_expected = 12480;
+    digit_t mod_result;
+    Number a, c;
+    digit_t b, d;
+    setInt(&a, 1234500);
+    b = 67890;
+    divmodByInt(&a, &b, &c, &d);
+    getInt(&c, &div_result);
+    mod_result = d;
+    my_assert((div_result == div_expected) && "test 1234500 / 67890");
+    my_assert((mod_result == mod_expected) && "test 1234500 %% 67890");
+}
+
+void test_divmodByInt_big() {
+    printf("* test_divmodByInt_big\n");
+    char* div_expected = "1818382677861246133451171011931064958020326999558108705258506407423773751657092355280600972160848431";
+    char div_result[KETA * RADIX_LEN + 2];
+    digit_t mod_expected = 19410;
+    digit_t mod_result;
+    Number tmp;
+    Number a, c;
+    digit_t b, d;
+    setInt(&a, 12345); mulBy10E(100, &a, &tmp); copyNumber(&tmp, &a);
+    b = 67890;
+    divmodByInt(&a, &b, &c, &d);
+    getStr(&c, div_result);
+    mod_result = d;
+    my_assert((strcmp(div_result, div_expected) == 0) && "test 12345E100 / 67890");
+    my_assert((mod_result == mod_expected) && "test 12345E100 %% 67890");
 }
 
 void test_power() {
