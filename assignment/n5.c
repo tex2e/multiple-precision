@@ -10,9 +10,9 @@
 int main(void) {
     Number num, tmp, result;
 
-    // num = 49012345 * 10^1000
-    setInt(&num, 49012345);
-    mulBy10E(1000, &num, &tmp); copyNumber(&tmp, &num);
+    // num = 2 * 10^2000
+    setInt(&num, 2);
+    mulBy10E(2000, &num, &tmp); copyNumber(&tmp, &num);
 
     puts("sqrt(");
     dispNumberZeroSuppress(&num); putchar('\n');
