@@ -227,7 +227,7 @@ void swapNumber(Number *a, Number *b) {
 // Set int value to Number
 // Return  0 if success
 // Return -1 if cannot set the value x into the num
-int setInt(Number *num, int x) {
+int setInt(Number *num, digit_t x) {
     int i = 0;
     clearByZero(num);
 
@@ -251,7 +251,7 @@ int setInt(Number *num, int x) {
 // Get int value from Number
 // Return  0 if success
 // Return -1 if digit number of integer is out of int (TODO)
-int getInt(const Number *num, int *x) {
+int getInt(const Number *num, digit_t *x) {
     int i;
     *x = 0;
 
