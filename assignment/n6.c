@@ -59,27 +59,27 @@ int main(void) {
         clearByZero(&numer);
         clearByZero(&denom);
 
-        multiple(&n1, &n1, &n2);
-        multiple(&n2, &n1, &n3);
-        multiple(&n2, &n2, &n4);
+        multiple(&n1, &n1, &n2); // n^2 = n^1 * n^1
+        multiple(&n2, &n1, &n3); // n^3 = n^2 * n^1
+        multiple(&n2, &n2, &n4); // n^4 = n^2 * n^2
 
         // numer = 120 n^2 + 151 n^1 + 47
-        multiple(&onetwenty, &n2, &term); // term = 120 * n^2
-        add(&numer, &term, &tmp); copyNumber(&tmp, &numer); // numer += term
-        multiple(&onefiftyone, &n1, &term); // term = 151 * n
-        add(&numer, &term, &tmp); copyNumber(&tmp, &numer); // numer += term
-        add(&numer, &fortyseven, &tmp); copyNumber(&tmp, &numer); // numer += 47
+        multiple(&onetwenty, &n2, &term);
+        add(&numer, &term, &tmp); copyNumber(&tmp, &numer);
+        multiple(&onefiftyone, &n1, &term);
+        add(&numer, &term, &tmp); copyNumber(&tmp, &numer);
+        add(&numer, &fortyseven, &tmp); copyNumber(&tmp, &numer);
 
         // denom = 512 n^4 + 1024 n^3 + 712 n^2 + 194 n + 15
-        multiple(&fivetwelve, &n4, &term); // term = 512 n^4
-        add(&denom, &term, &tmp); copyNumber(&tmp, &denom); // denom += term
-        multiple(&tentwentyfour, &n3, &term); // term = 1024 n^3
-        add(&denom, &term, &tmp); copyNumber(&tmp, &denom); // denom += term
-        multiple(&seventwelve, &n2, &term); // term = 712 n^2
-        add(&denom, &term, &tmp); copyNumber(&tmp, &denom); // denom += term
-        multiple(&oneninetyfour, &n1, &term); // term = 194 n
-        add(&denom, &term, &tmp); copyNumber(&tmp, &denom); // denom += term
-        add(&denom, &fifteen, &tmp); copyNumber(&tmp, &denom); // denom += 15
+        multiple(&fivetwelve, &n4, &term);
+        add(&denom, &term, &tmp); copyNumber(&tmp, &denom);
+        multiple(&tentwentyfour, &n3, &term);
+        add(&denom, &term, &tmp); copyNumber(&tmp, &denom);
+        multiple(&seventwelve, &n2, &term);
+        add(&denom, &term, &tmp); copyNumber(&tmp, &denom);
+        multiple(&oneninetyfour, &n1, &term);
+        add(&denom, &term, &tmp); copyNumber(&tmp, &denom);
+        add(&denom, &fifteen, &tmp); copyNumber(&tmp, &denom);
 
         multiple(&numer, &prec, &tmp); copyNumber(&tmp, &numer); // numer *= prec
 
