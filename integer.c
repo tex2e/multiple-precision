@@ -638,6 +638,7 @@ int divmodPositiveNumber(const Number *a, const Number *b, Number *q, Number *m)
     Number division, remain;
     Number result;
     Number next;
+    Number digitMax;
     clearByZero(&num);
     clearByZero(&result);
     clearByZero(&next);
@@ -648,6 +649,18 @@ int divmodPositiveNumber(const Number *a, const Number *b, Number *q, Number *m)
         setInt(q, 0);
         copyNumber(a, m);
         return 0;
+    }
+
+    // use divmodByInt if b < RADIX
+    setInt(&digitMax, RADIX);
+    if (compNumber(&divisor, &digitMax) < 0) {
+        int r;
+        digit_t divisor_;
+        digit_t rem_;
+        getInt(&divisor, &divisor_);
+        r = divmodPositiveNumberByInt(a, &divisor_, q, &rem_);
+        setInt(m, rem_);
+        return r;
     }
 
     // to ignore prefix 0 digits
