@@ -889,29 +889,29 @@ bool isPrime(const Number *_num) {
     Number tmp;
     Number zero, two;
     Number num = *_num;
-    Number division;
+    Number divisor;
     Number max;
     Number remain;
     setInt(&zero, 0);
     setInt(&two, 2);
-    setInt(&division, 1);
+    setInt(&divisor, 3);
     clearByZero(&remain);
 
-    divmod(&num, &two, &max, &_);
+    sqrtNumber(&num, &max);
 
     if (num.n[0] % 2 == 0) {
         return FALSE;
     }
 
     while (1) {
-        add(&division, &two, &tmp); copyNumber(&tmp, &division); // division += 2
+        if (compNumber(&divisor, &max) > 0) break;
 
-        if (compNumber(&division, &max) >= 0) break;
-
-        divmod(&num, &division, &_, &remain);
+        divmod(&num, &divisor, &_, &remain);
         if (compNumber(&remain, &zero) == 0) {
             return FALSE;
         }
+
+        add(&divisor, &two, &tmp); copyNumber(&tmp, &divisor); // divisor += 2
     }
 
     return TRUE;
@@ -1010,6 +1010,8 @@ int sqrtNumber(const Number *num, Number *result) {
     Number tmp, tmp2;
     Number xNext, x, xPrev;
     Number two;
+    digit_t two_ = 2;
+    digit_t rem;
 
     copyNumber(num, &x);
     clearByZero(&xNext);
@@ -1017,21 +1019,34 @@ int sqrtNumber(const Number *num, Number *result) {
 
     divmod(&x, &two, &tmp, &_); copyNumber(&tmp, &x); // x = x / 2
 
-    while (1) {
-        // xPrev = x
-        copyNumber(&x, &xPrev);
-        // x = xNext
-        copyNumber(&xNext, &x);
+    // sqrt(N) = x  ->  x^2 = N
+    // f(x) = x^2 - N
+    //
+    // Newton-Raphson method (Root-finding algorithm):
+    //   x_{i+1} = x_i - (x_i^2 - N) / (2 x_i)
+    //           = ((2 x_i^2) / (2 x_i)) - (x_i^2 / (2 x_i)) + (N / (2 x_i))
+    //           = (x_i^2 / (2 x_i)) + (N / (2 x_i))
+    //           = (x_i / 2) + (N / (2 x_i))
+    //           = (x_i + N / x_i) / 2
+    //
 
+    copyNumber(&x, &xPrev); // xPrev = x
+
+    while (1) {
         // xNext = (x + (num / x)) / 2
         divmod(num, &x, &tmp, &_);
         add(&x, &tmp, &tmp2);
-        divmod(&tmp2, &two, &xNext, &_);
+        divmodByInt(&tmp2, &two_, &xNext, &rem);
 
         if (compNumber(&xNext, &x) == 0) break; // converge
         if (compNumber(&xNext, &xPrev) == 0) {  // oscillate
             if (compNumber(&x, &xNext) < 0) copyNumber(&x, &xNext);
+            break;
         }
+
+        // next
+        copyNumber(&x, &xPrev); // xPrev = x
+        copyNumber(&xNext, &x); // x = xNext
     }
 
     copyNumber(&xNext, result);
