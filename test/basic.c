@@ -8,12 +8,14 @@
 
 void test_mulBy10();
 void test_mulBy10E();
+void test_mulBy10E_big();
 void test_divBy10();
 void test_divBy10E();
 
 int main() {
     test_mulBy10();
     test_mulBy10E();
+    test_mulBy10E_big();
     test_divBy10();
     test_divBy10E();
 
@@ -47,6 +49,18 @@ void test_mulBy10E() {
     mulBy10E(5, &a, &tmp); copyNumber(&tmp, &a);
     getInt(&a, &result);
     my_assert((result == expected) && "test 1 * 1e5");
+}
+
+void test_mulBy10E_big() {
+    printf("* test_mulBy10E_big\n");
+    char* expected = "12300000000000000000000000000000000000000000000000000";
+    char result[KETA * RADIX_LEN + 2];
+    Number a, b;
+    Number tmp;
+    setInt(&a, 123);
+    mulBy10E(50, &a, &b);
+    getStr(&b, result);
+    my_assert((strcmp(result, expected) == 0) && "test 123 * 1e50");
 }
 
 void test_divBy10() {
