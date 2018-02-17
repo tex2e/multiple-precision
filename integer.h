@@ -32,8 +32,8 @@ typedef int bool;
 // To change these, gives -D RADIX=1000000000 and -D RADIX_LEN=9 to gcc.
 //
 // Use "long" or "int" as digit type.
-// To use long, gives -D NUMBER_DIGIT_LONG=TRUE to gcc.
-#ifdef NUMBER_DIGIT_LONG
+// To use long, gives -D NUMBER_DIGIT_INT=TRUE to gcc.
+#ifndef NUMBER_DIGIT_INT
 // long
 #define digit_t long
 #define div ldiv
