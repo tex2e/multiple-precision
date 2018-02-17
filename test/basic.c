@@ -21,8 +21,8 @@ int main() {
 
 void test_mulBy10() {
     printf("* test_mulBy10\n");
-    int expected = 100000;
-    int result;
+    digit_t expected = 100000;
+    digit_t result;
     Number a;
     Number tmp;
     setInt(&a, 1);
@@ -37,8 +37,8 @@ void test_mulBy10() {
 
 void test_mulBy10E() {
     printf("* test_mulBy10E\n");
-    int expected = 100000;
-    int result;
+    digit_t expected = 100000;
+    digit_t result;
     Number a;
     Number tmp;
     setInt(&a, 1);
@@ -49,8 +49,8 @@ void test_mulBy10E() {
 
 void test_divBy10() {
     printf("* test_mulBy10\n");
-    int expected = 10;
-    int result;
+    digit_t expected = 10;
+    digit_t result;
     Number a;
     Number tmp;
     setInt(&a, 100000);

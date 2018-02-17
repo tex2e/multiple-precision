@@ -42,8 +42,8 @@ int main(void) {
 
 void test_add() {
     printf("* test_add\n");
-    int expected = 12345 + 67890;
-    int result;
+    digit_t expected = 12345 + 67890;
+    digit_t result;
     Number a, b, c;
     setInt(&a, 12345);
     setInt(&b, 67890);
@@ -67,8 +67,8 @@ void test_add_big() {
 
 void test_sub() {
     printf("* test_sub\n");
-    int expected = 12345 - 67890;
-    int result;
+    digit_t expected = 12345 - 67890;
+    digit_t result;
     Number a, b, c;
     setInt(&a, 12345);
     setInt(&b, 67890);
@@ -92,8 +92,8 @@ void test_sub_big() {
 
 void test_mul() {
     printf("* test_mul\n");
-    int expected = 12345 * 67890;
-    int result;
+    digit_t expected = 12345 * 67890;
+    digit_t result;
     Number a, b, c;
     setInt(&a, 12345);
     setInt(&b, 67890);
@@ -117,10 +117,10 @@ void test_mul_big() {
 
 void test_divmod() {
     printf("* test_divmod\n");
-    int div_expected = 1234500 / 67890;
-    int div_result;
-    int mod_expected = 1234500 % 67890;
-    int mod_result;
+    digit_t div_expected = 1234500 / 67890;
+    digit_t div_result;
+    digit_t mod_expected = 1234500 % 67890;
+    digit_t mod_result;
     Number a, b, c, d;
     setInt(&a, 1234500);
     setInt(&b, 67890);
@@ -150,8 +150,8 @@ void test_divmod_big() {
 
 void test_divmodByInt() {
     printf("* test_divmodByInt\n");
-    int div_expected = 18;
-    int div_result;
+    digit_t div_expected = 18;
+    digit_t div_result;
     digit_t mod_expected = 12480;
     digit_t mod_result;
     Number a, c;
@@ -185,8 +185,8 @@ void test_divmodByInt_big() {
 
 void test_power() {
     printf("* test_power\n");
-    int expected = pow(2, 20);
-    int result;
+    digit_t expected = pow(2, 20);
+    digit_t result;
     Number a, b, c;
     setInt(&a, 2);
     setInt(&b, 20);
