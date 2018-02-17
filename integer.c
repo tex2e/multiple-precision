@@ -157,7 +157,7 @@ int mulBy10E(int exponent, const Number *num, Number *result) {
 int divBy10(const Number *num, Number *result) {
     int i;
     digit_t remain;
-    digit_t leftDigit, currentDigit;
+    div_t divResult;
     clearByZero(result);
 
     if (isZero(num)) {
@@ -165,17 +165,12 @@ int divBy10(const Number *num, Number *result) {
         return 0;
     }
 
-    remain = num->n[0] % 10;
-
-    for (i = 0; i < KETA - 1; i++) {
-        leftDigit    = num->n[i+1] % 10;
-        currentDigit = leftDigit * (RADIX / 10) + num->n[i] / 10;
-        result->n[i] = currentDigit;
+    remain = 0;
+    for (i = KETA - 1; i >= 0; i--) {
+        divResult = div(num->n[i], 10);
+        result->n[i] = divResult.quot + remain * (RADIX / 10);
+        remain       = divResult.rem;
     }
-
-    i = KETA - 1;
-    currentDigit = num->n[i] / 10;
-    result->n[i] = currentDigit;
 
     setSign(result, getSign(num));
 
