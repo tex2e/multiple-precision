@@ -840,7 +840,7 @@ int divmodByInt(const Number *a, const digit_t *b, Number *quo, digit_t *mod) {
 //   where b >= 0
 // Return  0 if success
 int power(const Number *a, const Number *b, Number *c) {
-    Number tmp;
+    Number tmp, _;
     Number i;
     Number zero, one;
     Number result;
@@ -867,17 +867,22 @@ int power(const Number *a, const Number *b, Number *c) {
         return 0;
     }
 
-    // pow(a, b)
-    setInt(&result, 1);
-    while (1) {
-        if (compNumber(&i, b) >= 0) break;
-
-        multiple(&result, a, &tmp); copyNumber(&tmp, &result); // result *= a
-        increment(&i, &tmp); copyNumber(&tmp, &i); // i++
+    if (b->n[0] % 2 == 0) {
+        Number a2; // a^2
+        Number bHalf;
+        Number two;
+        setInt(&two, 2);
+        multiple(a, a, &a2);
+        divmod(b, &two, &bHalf, &_);
+        return power(&a2, &bHalf, c); // pow(a^2, b/2)
+    } else {
+        Number bDecrement;
+        Number res;
+        decrement(b, &bDecrement);
+        power(a, &bDecrement, &res); // res = pow(a, b-1)
+        multiple(&res, a, &tmp); copyNumber(&tmp, c); // c = res * a
+        return 0;
     }
-    copyNumber(&result, c);
-
-    return 0;
 }
 
 // isPrime(num) :: bool
