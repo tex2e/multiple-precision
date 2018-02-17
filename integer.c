@@ -97,7 +97,7 @@ bool isZero(const Number *num) {
 // Return -1 if overflow the result
 int mulBy10(const Number *num, Number *result) {
     int i;
-    digit_t leftDigit, currentDigit;
+    digit_t carry;
     div_t divResult;
     clearByZero(result);
 
@@ -107,26 +107,19 @@ int mulBy10(const Number *num, Number *result) {
         return 0;
     }
 
-    i = KETA - 1;
-    divResult    = div(num->n[i] * 10, RADIX);
-    leftDigit    = divResult.quot; // num->n[i] * 10 / RADIX;
-    currentDigit = divResult.rem;  // num->n[i] * 10 % RADIX;
-    result->n[i] = currentDigit;
-    if (leftDigit > 0) {
+    if (num->n[KETA-1] / (RADIX / 10) != 0) {
         printf("mulBy10: overflow\n\n");
         return -1;
     }
 
-    for (i = KETA - 2; i >= 0; i--) {
-        divResult    = div(num->n[i] * 10, RADIX);
-        leftDigit    = divResult.quot; // num->n[i] * 10 / RADIX;
-        currentDigit = divResult.rem;  // num->n[i] * 10 % RADIX;
-        result->n[i+1] += leftDigit;
-        result->n[i  ] = currentDigit;
+    carry = 0;
+    for (i = 0; i < KETA; i++) {
+        divResult = div(num->n[i] * 10 + carry, RADIX);
+        carry        = divResult.quot;
+        result->n[i] = divResult.rem;
     }
 
     setSign(result, getSign(num));
-
     return 0;
 }
 
