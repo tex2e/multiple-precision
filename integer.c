@@ -130,8 +130,11 @@ int mulBy10(const Number *num, Number *result) {
 // Return -2 if overflow the result
 int mulBy10E(int exponent, const Number *num, Number *result) {
     int i;
-    Number tmp, tmpResult;
+    int shiftCount, mulBy10Count;
+    Number tmpResult;
+
     clearByZero(result);
+    clearByZero(&tmpResult);
 
     if (exponent < 0) return -1;
 
@@ -141,14 +144,32 @@ int mulBy10E(int exponent, const Number *num, Number *result) {
         return 0;
     }
 
-    copyNumber(num, &tmpResult);
-    for (i = 0; i < exponent; i++) {
-        mulBy10(&tmpResult, &tmp); copyNumber(&tmp, &tmpResult);
+    shiftCount   = exponent / RADIX_LEN;
+    mulBy10Count = exponent % RADIX_LEN;
+
+    if (shiftCount >= 1) {
+        // shift to left
+        for (i = KETA - 1; i >= shiftCount; i--) {
+            tmpResult.n[i] = num->n[i - shiftCount];
+        }
+        for (i = shiftCount - 1; i >= 0; i--) {
+            tmpResult.n[i] = 0;
+        }
+    } else {
+        copyNumber(num, &tmpResult);
     }
-    copyNumber(&tmpResult, result);
+
+    if (mulBy10Count >= 1) {
+        digit_t carry = 0;
+        div_t divResult;
+        for (i = 0; i < KETA; i++) {
+            divResult = div(tmpResult.n[i] * (digit_t)pow(10, mulBy10Count) + carry, RADIX);
+            carry        = divResult.quot;
+            result->n[i] = divResult.rem;
+        }
+    }
 
     setSign(result, getSign(num));
-
     return 0;
 }
 
