@@ -36,8 +36,8 @@ typedef int bool;
 #ifndef NUMBER_DIGIT_INT
 // long
 #define digit_t long
-#define div ldiv
-#define div_t ldiv_t
+#define DIV ldiv
+#define DIV_t ldiv_t
 #define DIGIT_MAX LONG_MAX
 #ifndef RADIX
 #define RADIX 1000000000
@@ -48,6 +48,8 @@ typedef int bool;
 #else
 // int
 #define digit_t int
+#define DIV div
+#define DIV_t div_t
 #define DIGIT_MAX INT_MAX
 #ifndef RADIX
 #define RADIX 10000

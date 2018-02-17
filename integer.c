@@ -98,7 +98,7 @@ bool isZero(const Number *num) {
 int mulBy10(const Number *num, Number *result) {
     int i;
     digit_t carry;
-    div_t divResult;
+    DIV_t divResult;
     clearByZero(result);
 
     // result = num if num == 0
@@ -114,9 +114,9 @@ int mulBy10(const Number *num, Number *result) {
 
     carry = 0;
     for (i = 0; i < KETA; i++) {
-        divResult = div(num->n[i] * 10 + carry, RADIX);
-        carry        = divResult.quot;
-        result->n[i] = divResult.rem;
+        divResult = DIV(num->n[i] * 10 + carry, RADIX);
+        carry        = divResult.quot; // num.n[i] * 10 + carry / RADIX
+        result->n[i] = divResult.rem;  // num.n[i] * 10 + carry % RADIX
     }
 
     setSign(result, getSign(num));
@@ -166,9 +166,9 @@ int mulBy10E(int exponent, const Number *num, Number *result) {
     if (mulBy10Count >= 1) {
         // multiply each digit by 10^n
         digit_t carry = 0;
-        div_t divResult;
+        DIV_t divResult;
         for (i = 0; i < KETA; i++) {
-            divResult = div(tmpResult.n[i] * (digit_t)pow(10, mulBy10Count) + carry, RADIX);
+            divResult = DIV(tmpResult.n[i] * (digit_t)pow(10, mulBy10Count) + carry, RADIX);
             carry        = divResult.quot;
             result->n[i] = divResult.rem;
         }
@@ -185,7 +185,7 @@ int mulBy10E(int exponent, const Number *num, Number *result) {
 int divBy10(const Number *num, Number *result) {
     int i;
     digit_t remain;
-    div_t divResult;
+    DIV_t divResult;
     clearByZero(result);
 
     if (isZero(num)) {
@@ -195,7 +195,7 @@ int divBy10(const Number *num, Number *result) {
 
     remain = 0;
     for (i = KETA - 1; i >= 0; i--) {
-        divResult = div(num->n[i], 10);
+        divResult = DIV(num->n[i], 10);
         result->n[i] = divResult.quot + remain * (RADIX / 10);
         remain       = divResult.rem;
     }
@@ -535,7 +535,7 @@ int multiplePositiveNumber(const Number *a, const Number *b, Number *result) {
     int aiMax, biMax;
     int carry = 0;
     int r; // return value
-    div_t divResult;
+    DIV_t divResult;
     Number tmp;
     Number tmpResult;
     clearByZero(result);
@@ -557,7 +557,7 @@ int multiplePositiveNumber(const Number *a, const Number *b, Number *result) {
         // d_ai = a_ai * b_bi
         for (ai = 0; ai <= aiMax; ai++) {
             digit_t mul = a->n[ai] * b->n[bi] + carry;
-            divResult = div(mul, RADIX);
+            divResult = DIV(mul, RADIX);
             d.n[ai]   = divResult.rem;  // mul % RADIX
             carry     = divResult.quot; // mul / RADIX
         }
@@ -789,11 +789,9 @@ int divmodPositiveNumberByInt(const Number *a, const digit_t *b, Number *q, digi
     num = a->n[begin];
 
     while (i >= 0) {
-        div_t divResult = div(num, divisor);
-        division = divResult.quot;
-        remain   = divResult.rem;
-
-        // printf("%i) %ld ... %ld\n", i, division, remain);
+        DIV_t divResult = DIV(num, divisor);
+        division = divResult.quot; // num / divisor
+        remain   = divResult.rem;  // num % divisor
 
         result.n[i] = division;
         if (i == 0) break;
@@ -804,6 +802,7 @@ int divmodPositiveNumberByInt(const Number *a, const digit_t *b, Number *q, digi
         // num = remain * 1e+RADIX_LEN + next
         num = remain * RADIX + next;
 
+        // next
         i--;
     }
 
