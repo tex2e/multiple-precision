@@ -144,6 +144,10 @@ int mulBy10E(int exponent, const Number *num, Number *result) {
         return 0;
     }
 
+    // Example: (exponent = 500, RADIX_LEN = 9)
+    //   1. shift to left 55 times (which is equals to multiply by 10^{55*9})
+    //   2. then, multiply each digit by 10^5.
+
     shiftCount   = exponent / RADIX_LEN;
     mulBy10Count = exponent % RADIX_LEN;
 
@@ -160,6 +164,7 @@ int mulBy10E(int exponent, const Number *num, Number *result) {
     }
 
     if (mulBy10Count >= 1) {
+        // multiply each digit by 10^n
         digit_t carry = 0;
         div_t divResult;
         for (i = 0; i < KETA; i++) {
@@ -167,6 +172,8 @@ int mulBy10E(int exponent, const Number *num, Number *result) {
             carry        = divResult.quot;
             result->n[i] = divResult.rem;
         }
+    } else {
+        copyNumber(&tmpResult, result);
     }
 
     setSign(result, getSign(num));
