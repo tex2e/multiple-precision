@@ -44,7 +44,6 @@ int main(void) {
         } else if (factorCount > 0) {
             printf("R_%d is not a prime number.\n", n);
             puts("Factors:");
-            printf("factorCount = %d\n", factorCount);
             for (i = 0; i < factorCount; i++) {
                 dispNumberZeroSuppress(&factors[i]); putchar('\n');
             }
