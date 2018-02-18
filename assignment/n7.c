@@ -7,6 +7,7 @@
 //
 //     (3/(6n+1) - 2/(6n+3) - 1/(6n+4))
 //   = (42 n + 25) / (6 (36 n^3 + 48 n^2 + 19 n + 2))
+//   = (42 n + 25) / (n (n (36 n + 48) + 19) + 2)
 //
 
 #include <stdio.h>
@@ -18,8 +19,8 @@ int main(void) {
     int extraDigits = 10;
     int calcDigits = digits + extraDigits;
     Number tmp, _;
-    Number n1, n2, n3;
-    Number term, quot;
+    Number n;
+    Number quot;
     Number numer, denom; // numer/denom
     Number one, fortytwo, twentyfive;
     Number thirtysix, fortyeight, nineteen, two, six;
@@ -40,9 +41,7 @@ int main(void) {
     setInt(&minusTwentyseven, -27);
     setInt(&denom1, 1);
 
-    clearByZero(&n1);
-    clearByZero(&n2);
-    clearByZero(&n3);
+    clearByZero(&n);
     clearByZero(&result);
 
     mulBy10E(calcDigits, &one, &prec); // prec = 1e+digits
@@ -51,21 +50,18 @@ int main(void) {
         clearByZero(&numer);
         clearByZero(&denom);
 
-        multiple(&n1, &n1, &n2); // n^2 = n^1 * n^1
-        multiple(&n2, &n1, &n3); // n^3 = n^2 * n^1
-
         // numer = 42 n + 25
-        multiple(&fortytwo, &n1, &term);
-        add(&numer, &term, &tmp); copyNumber(&tmp, &numer);
+        copyNumber(&fortytwo, &numer);
+        multiple(&numer, &n, &tmp); copyNumber(&tmp, &numer);
         add(&numer, &twentyfive, &tmp); copyNumber(&tmp, &numer);
 
-        // denom = 6 (36 n^3 + 48 n^2 + 19 n + 2)
-        multiple(&thirtysix, &n3, &term);
-        add(&denom, &term, &tmp); copyNumber(&tmp, &denom);
-        multiple(&fortyeight, &n2, &term);
-        add(&denom, &term, &tmp); copyNumber(&tmp, &denom);
-        multiple(&nineteen, &n1, &term);
-        add(&denom, &term, &tmp); copyNumber(&tmp, &denom);
+        // denom = 6 (n (n (36 n + 48) + 19) + 2)
+        copyNumber(&thirtysix, &denom);
+        multiple(&denom, &n, &tmp); copyNumber(&tmp, &denom);
+        add(&denom, &fortyeight, &tmp); copyNumber(&tmp, &denom);
+        multiple(&denom, &n, &tmp); copyNumber(&tmp, &denom);
+        add(&denom, &nineteen, &tmp); copyNumber(&tmp, &denom);
+        multiple(&denom, &n, &tmp); copyNumber(&tmp, &denom);
         add(&denom, &two, &tmp); copyNumber(&tmp, &denom);
         multiple(&denom, &six, &tmp); copyNumber(&tmp, &denom);
 
@@ -78,7 +74,7 @@ int main(void) {
         add(&result, &quot, &tmp); copyNumber(&tmp, &result);
 
         // next
-        increment(&n1, &tmp); copyNumber(&tmp, &n1);
+        increment(&n, &tmp); copyNumber(&tmp, &n);
         multiple(&denom1, &minusTwentyseven, &tmp); copyNumber(&tmp, &denom1);
     }
 
