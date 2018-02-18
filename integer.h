@@ -98,6 +98,7 @@ int divmodPositiveNumberByInt(const Number*, const digit_t*, Number*, digit_t*);
 int divmodByInt(const Number*, const digit_t*, Number*, digit_t*);
 int power(const Number*, const Number*, Number*);
 bool isPrime(const Number*);
+int factorizeNumber(const Number*, Number*, int);
 int factorialNumber(const Number*, Number*);
 int gcdNumber(const Number*, const Number*, Number*);
 int lcmNumber(const Number*, const Number*, Number*);

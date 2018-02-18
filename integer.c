@@ -905,36 +905,128 @@ int power(const Number *a, const Number *b, Number *c) {
 // Return TRUE  if num is prime
 // Return FALSE if num is not prime
 bool isPrime(const Number *_num) {
+    int step;
     Number _;
     Number tmp;
-    Number zero, two;
+    Number zero, two, four;
     Number num = *_num;
     Number divisor;
     Number max;
     Number remain;
     setInt(&zero, 0);
     setInt(&two, 2);
-    setInt(&divisor, 3);
+    setInt(&four, 4);
     clearByZero(&remain);
 
     sqrtNumber(&num, &max);
 
-    if (num.n[0] % 2 == 0) {
-        return FALSE;
-    }
+    // 徐数列: 2,3,5,7,11,13,17,19,23,25,29,...
+    // 最初の3項の次に 2 と 4 を交互に加えていったものを使用
+    // 素数ではない 25,36,49 なども徐数列に含まれる
 
+    setInt(&divisor, 2);
+    divmod(&num, &divisor, &_, &remain);
+    if (compNumber(&remain, &zero) == 0) return FALSE;
+
+    setInt(&divisor, 3);
+    divmod(&num, &divisor, &_, &remain);
+    if (compNumber(&remain, &zero) == 0) return FALSE;
+
+    setInt(&divisor, 5);
+    divmod(&num, &divisor, &_, &remain);
+    if (compNumber(&remain, &zero) == 0) return FALSE;
+
+    step = 2;
     while (1) {
         if (compNumber(&divisor, &max) > 0) break;
+
+        if (step == 2) {
+            add(&divisor, &two, &tmp); copyNumber(&tmp, &divisor); // divisor += 2
+            step = 4; // for next
+        } else {
+            add(&divisor, &four, &tmp); copyNumber(&tmp, &divisor); // divisor += 4
+            step = 2; // for next
+        }
 
         divmod(&num, &divisor, &_, &remain);
         if (compNumber(&remain, &zero) == 0) {
             return FALSE;
         }
-
-        add(&divisor, &two, &tmp); copyNumber(&tmp, &divisor); // divisor += 2
     }
 
     return TRUE;
+}
+
+// factors <- factorize(60) == {2,2,3,5}
+// Return factor count.
+// Return -1 if factor count is bigger than maxFactors.
+int factorizeNumber(const Number *_num, Number *factors, int maxFactors) {
+    int step;
+    int factor_i = 0;
+    int prime_i = 0;
+    int primes[] = {2,3,5};
+    bool isPrimeNumber = TRUE;
+    Number tmp;
+    Number zero, one, two, four;
+    Number num = *_num;
+    Number divisor;
+    Number max;
+    Number quot, remain;
+    setInt(&zero, 0);
+    setInt(&one, 1);
+    setInt(&two, 2);
+    setInt(&four, 4);
+    clearByZero(&remain);
+
+    sqrtNumber(&num, &max);
+
+    // 徐数列: 2,3,5,7,11,13,17,19,23,25,29,...
+    // 最初の3項の次に 2 と 4 を交互に加えていったものを使用
+    // 素数ではない 25,36,49 なども徐数列に含まれる
+
+    for (prime_i = 0; prime_i < 3; prime_i++) {
+        while (1) {
+            setInt(&divisor, primes[prime_i]);
+            divmod(&num, &divisor, &quot, &remain);
+            if (compNumber(&remain, &zero) == 0) {
+                if (factor_i == maxFactors) return -1;
+                factors[factor_i++] = divisor;
+                copyNumber(&quot, &num);
+                isPrimeNumber = FALSE;
+                continue;
+            }
+            break;
+        }
+    }
+
+    step = 2;
+    while (1) {
+        if (compNumber(&divisor, &max) > 0) break;
+
+        if (step == 2) {
+            add(&divisor, &two, &tmp); copyNumber(&tmp, &divisor); // divisor += 2
+            step = 4; // for next
+        } else {
+            add(&divisor, &four, &tmp); copyNumber(&tmp, &divisor); // divisor += 4
+            step = 2; // for next
+        }
+
+        divmod(&num, &divisor, &quot, &remain);
+        if (compNumber(&remain, &zero) == 0) {
+            if (factor_i == maxFactors) return -1;
+            factors[factor_i++] = divisor;
+            copyNumber(&quot, &num);
+            isPrimeNumber = FALSE;
+            continue;
+        }
+    }
+
+    if (!isPrimeNumber && compNumber(&num, &one) != 0) {
+        if (factor_i == maxFactors) return -1;
+        factors[factor_i++] = num;
+    }
+
+    return factor_i;
 }
 
 // result <- num!
@@ -1024,6 +1116,17 @@ int slowSqrtNumber(const Number *num, Number *result) {
 // Return  0 if success
 // Return -1 if num < 0
 // Calculate sqrt with Newton-Raphson method.
+//   sqrt(N) = x  ->  x^2 = N  ->  x^2 - N = 0
+//   f(x)  = x^2 - N
+//   f'(x) = 2x
+//   Root-finding algorithm:
+//     x_{i+1} = x_i - f(x_i) / f'(x_i)
+//             = x_i - (x_i^2 - N) / (2 x_i)
+//             = ((2 x_i^2) / (2 x_i)) - (x_i^2 / (2 x_i)) + (N / (2 x_i))
+//             = (x_i^2 / (2 x_i)) + (N / (2 x_i))
+//             = (x_i / 2) + (N / (2 x_i))
+//             = (x_i + N / x_i) / 2
+//
 int sqrtNumber(const Number *num, Number *result) {
     int i;
     Number _;
@@ -1032,24 +1135,11 @@ int sqrtNumber(const Number *num, Number *result) {
     Number two;
     digit_t two_ = 2;
     digit_t rem;
-
     copyNumber(num, &x);
     clearByZero(&xNext);
     setInt(&two, 2);
 
     divmod(&x, &two, &tmp, &_); copyNumber(&tmp, &x); // x = x / 2
-
-    // sqrt(N) = x  ->  x^2 = N
-    // f(x) = x^2 - N
-    //
-    // Newton-Raphson method (Root-finding algorithm):
-    //   x_{i+1} = x_i - (x_i^2 - N) / (2 x_i)
-    //           = ((2 x_i^2) / (2 x_i)) - (x_i^2 / (2 x_i)) + (N / (2 x_i))
-    //           = (x_i^2 / (2 x_i)) + (N / (2 x_i))
-    //           = (x_i / 2) + (N / (2 x_i))
-    //           = (x_i + N / x_i) / 2
-    //
-
     copyNumber(&x, &xPrev); // xPrev = x
 
     while (1) {
