@@ -200,7 +200,6 @@ void test_power_big() {
     char* expected = "11110408185131956285910790587176451918559153212268021823629073199866111001242743283966127048043";
     char result[KETA * RADIX_LEN + 2];
     Number a, b, c;
-    Number tmp;
     setInt(&a, 123);
     setInt(&b, 45);
     power(&a, &b, &c);
