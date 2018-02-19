@@ -1011,6 +1011,8 @@ int factorizeNumber(const Number *_num, Number *factors, int maxFactors) {
             step = 2; // for next
         }
 
+        if (divisor.n[0] % 5 == 0) continue;
+
         divmod(&num, &divisor, &quot, &remain);
         if (compNumber(&remain, &zero) == 0) {
             if (factor_i == maxFactors) return -1;
