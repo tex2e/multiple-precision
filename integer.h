@@ -59,6 +59,10 @@ typedef int bool;
 #endif
 #endif
 
+// useful macros
+#define MAX(a,b) ((a) > (b) ? a : b)
+#define MIN(a,b) ((a) < (b) ? a : b)
+
 typedef struct NUMBER {
     digit_t n[KETA];
     char sign;

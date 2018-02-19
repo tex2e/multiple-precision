@@ -363,8 +363,8 @@ int addPositiveNumber(const Number *a, const Number *b, Number *result) {
     clearByZero(result);
 
     // to ignore prefix 0 digits
-    for (i = KETA - 1; i != 0 && a->n[i-1] == 0 && b->n[i-1] == 0; i--) ;
-    iMax = (i + 1 >= KETA - 1) ? KETA - 1 : i + 1;
+    for (i = KETA - 1; i != 0 && a->n[i] == 0 && b->n[i] == 0; i--) ;
+    iMax = MIN(i + 1, KETA - 1);
 
     for (i = 0; i <= iMax; i++) {
         digit_t sum = a->n[i] + b->n[i] + carry;
@@ -398,8 +398,8 @@ int subPositiveNumber(const Number *_a, const Number *_b, Number *result) {
     }
 
     // to ignore prefix 0 digits
-    for (i = KETA - 1; i != 0 && a.n[i-1] == 0 && b.n[i-1] == 0; i--) ;
-    iMax = (i + 1 >= KETA - 1) ? KETA - 1 : i + 1;
+    for (i = KETA - 1; i != 0 && a.n[i] == 0 && b.n[i] == 0; i--) ;
+    iMax = MIN(i + 1, KETA - 1);
 
     // compute diff
     for (i = 0; i <= iMax; i++) {
@@ -542,10 +542,10 @@ int multiplePositiveNumber(const Number *a, const Number *b, Number *result) {
     clearByZero(&tmpResult);
 
     // to ignore prefix 0 digits
-    for (i = KETA - 1; i != 0 && a->n[i-1] == 0; i--) ;
-    aiMax = i;
-    for (i = KETA - 1; i != 0 && b->n[i-1] == 0; i--) ;
-    biMax = i;
+    for (i = KETA - 1; i != 0 && a->n[i] == 0; i--) ;
+    aiMax = MIN(i + 1, KETA - 1);
+    for (i = KETA - 1; i != 0 && b->n[i] == 0; i--) ;
+    biMax = MIN(i + 1, KETA - 1);
 
     for (bi = 0; bi <= biMax; bi++) {
         Number d;
