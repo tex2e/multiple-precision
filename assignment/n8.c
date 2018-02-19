@@ -26,8 +26,8 @@ int main(void) {
     setInt(&zero, 0);
     setInt(&five, 5);
 
-    // start from R_2 = 11
-    for (n = 2; n < 20; n++) {
+    // R_2..R_20
+    for (n = 2; n <= 20; n++) {
         Number factors[100];
         factor_i = 0;
 
