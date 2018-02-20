@@ -399,7 +399,7 @@ int subPositiveNumber(const Number *_a, const Number *_b, Number *result) {
 
     // to ignore prefix 0 digits
     for (i = KETA - 1; i != 0 && a.n[i] == 0 && b.n[i] == 0; i--) ;
-    iMax = MIN(i + 1, KETA - 1);
+    iMax = i;
 
     // compute diff
     for (i = 0; i <= iMax; i++) {
@@ -578,6 +578,210 @@ int multiplePositiveNumber(const Number *a, const Number *b, Number *result) {
     return 0;
 }
 
+int multipleToomCook(const Number *a, const Number *b, Number *result) {
+    int i, di, x_;
+    int aiMax, biMax, iMax;
+    int d1iMax, d2iMax, d3iMax, divisionLength;
+    Number h0[5], h1[4], h2[3], h3[2], h4[1];
+    Number m0[5], m1[2], m2[3], m3[4], w[5];
+    Number tmp;
+    Number x, ux, vx;
+    Number a_d1, a_d2, a_d3;
+    Number b_d1, b_d2, b_d3;
+    Number two, three;
+    digit_t two_ = 2, three_ = 3, four_ = 4;
+    digit_t rem_;
+    setInt(&two, 2);
+    setInt(&three, 3);
+    clearByZero(result);
+
+    // 分割数d = 3
+    // 必要な係数wの数 = 2d - 1 = 5
+
+    // printf("a = "); dispNumberZeroSuppress(a); putchar('\n');
+    // printf("b = "); dispNumberZeroSuppress(b); putchar('\n');
+
+    for (i = KETA - 1; i != 0 && a->n[i] == 0; i--) ;
+    aiMax = MIN(i + 1, KETA - 1);
+    for (i = KETA - 1; i != 0 && b->n[i] == 0; i--) ;
+    biMax = MIN(i + 1, KETA - 1);
+    iMax = MAX(aiMax, biMax);
+
+    if (aiMax <= 3 || biMax <= 3) {
+        return multiplePositiveNumber(a, b, result);
+    }
+
+    d1iMax = (int)ceil(iMax / 3.0);
+    d2iMax = d1iMax * 2;
+    d3iMax = iMax;
+    divisionLength = d1iMax;
+
+    // printf("d1iMax, d2iMax, d3iMax = %d, %d, %d\n", d1iMax, d2iMax, d3iMax);
+    // printf("divisionLength = %d\n", divisionLength);
+    // printf("divisionLength * RADIX_LEN = %d\n", divisionLength * RADIX_LEN);
+
+    clearByZero(&a_d1);
+    clearByZero(&a_d2);
+    clearByZero(&a_d3);
+    clearByZero(&b_d1);
+    clearByZero(&b_d2);
+    clearByZero(&b_d3);
+    for (di = i = 0; i < d1iMax; di++, i++) {
+        a_d3.n[di] = a->n[i];
+        b_d3.n[di] = b->n[i];
+    }
+    for (di = 0, i = d1iMax; i < d2iMax; di++, i++) {
+        a_d2.n[di] = a->n[i];
+        b_d2.n[di] = b->n[i];
+    }
+    for (di = 0, i = d2iMax; i <= d3iMax; di++, i++) {
+        a_d1.n[di] = a->n[i];
+        b_d1.n[di] = b->n[i];
+    }
+
+    // printf("a_d1 = "); dispNumberZeroSuppress(&a_d1); putchar('\n');
+    // printf("a_d2 = "); dispNumberZeroSuppress(&a_d2); putchar('\n');
+    // printf("a_d3 = "); dispNumberZeroSuppress(&a_d3); putchar('\n');
+    // printf("b_d1 = "); dispNumberZeroSuppress(&b_d1); putchar('\n');
+    // printf("b_d2 = "); dispNumberZeroSuppress(&b_d2); putchar('\n');
+    // printf("b_d3 = "); dispNumberZeroSuppress(&b_d3); putchar('\n');
+
+    for (x_ = 0; x_ < 5; x_++) {
+        setInt(&x, x_);
+
+        // ux = a_d1 * x^2 + a_d2 * x + a_d3
+        //    = x (a_d1 x + a_d2) + a_d3
+        copyNumber(&a_d1, &ux);
+        multiple(&x, &ux, &tmp); copyNumber(&tmp, &ux);
+        add(&ux, &a_d2, &tmp); copyNumber(&tmp, &ux);
+        multiple(&x, &ux, &tmp); copyNumber(&tmp, &ux);
+        add(&ux, &a_d3, &tmp); copyNumber(&tmp, &ux);
+
+        // vx = b_d1 * x^2 + b_d2 * x + b_d3
+        //    = x (b_d1 x + b_d2) + b_d3
+        copyNumber(&b_d1, &vx);
+        multiple(&x, &vx, &tmp); copyNumber(&tmp, &vx);
+        add(&vx, &b_d2, &tmp); copyNumber(&tmp, &vx);
+        multiple(&x, &vx, &tmp); copyNumber(&tmp, &vx);
+        add(&vx, &b_d3, &tmp); copyNumber(&tmp, &vx);
+
+        // h0[x] = ux * vx
+        multiple(&ux, &vx, &h0[x_]);
+    }
+
+    // h1[0] = h0[1] - h0[0];
+    // h1[1] = h0[2] - h0[1];
+    // h1[2] = h0[3] - h0[2];
+    // h1[3] = h0[4] - h0[3];
+    // h2[0] = (h1[1] - h1[0]) / 2;
+    // h2[1] = (h1[2] - h1[1]) / 2;
+    // h2[2] = (h1[3] - h1[2]) / 2;
+    // h3[0] = (h2[1] - h2[0]) / 3;
+    // h3[1] = (h2[2] - h2[1]) / 3;
+    // h4[0] = (h3[1] - h3[0]) / 4;
+    sub(&h0[1], &h0[0], &h1[0]);
+    sub(&h0[2], &h0[1], &h1[1]);
+    sub(&h0[3], &h0[2], &h1[2]);
+    sub(&h0[4], &h0[3], &h1[3]);
+    sub(&h1[1], &h1[0], &tmp); divmodByInt(&tmp, &two_, &h2[0], &rem_);
+    sub(&h1[2], &h1[1], &tmp); divmodByInt(&tmp, &two_, &h2[1], &rem_);
+    sub(&h1[3], &h1[2], &tmp); divmodByInt(&tmp, &two_, &h2[2], &rem_);
+    sub(&h2[1], &h2[0], &tmp); divmodByInt(&tmp, &three_, &h3[0], &rem_);
+    sub(&h2[2], &h2[1], &tmp); divmodByInt(&tmp, &three_, &h3[1], &rem_);
+    sub(&h3[1], &h3[0], &tmp); divmodByInt(&tmp, &four_, &h4[0], &rem_);
+
+    // printf("h0[0] = "); dispNumberZeroSuppress(&h0[0]); putchar('\n');
+    // printf("h0[1] = "); dispNumberZeroSuppress(&h0[1]); putchar('\n');
+    // printf("h0[2] = "); dispNumberZeroSuppress(&h0[2]); putchar('\n');
+    // printf("h0[3] = "); dispNumberZeroSuppress(&h0[3]); putchar('\n');
+    // printf("h0[4] = "); dispNumberZeroSuppress(&h0[4]); putchar('\n');
+    // puts("------------------");
+    // printf("  h1[0] = "); dispNumberZeroSuppress(&h1[0]); putchar('\n');
+    // printf("  h1[1] = "); dispNumberZeroSuppress(&h1[1]); putchar('\n');
+    // printf("  h1[2] = "); dispNumberZeroSuppress(&h1[2]); putchar('\n');
+    // printf("  h1[3] = "); dispNumberZeroSuppress(&h1[3]); putchar('\n');
+    // puts("------------------");
+    // printf("    h2[0] = "); dispNumberZeroSuppress(&h2[0]); putchar('\n');
+    // printf("    h2[1] = "); dispNumberZeroSuppress(&h2[1]); putchar('\n');
+    // printf("    h2[2] = "); dispNumberZeroSuppress(&h2[2]); putchar('\n');
+    // puts("------------------");
+    // printf("      h3[0] = "); dispNumberZeroSuppress(&h3[0]); putchar('\n');
+    // printf("      h3[1] = "); dispNumberZeroSuppress(&h3[1]); putchar('\n');
+    // puts("------------------");
+    // printf("        h4[0] = "); dispNumberZeroSuppress(&h4[0]); putchar('\n');
+
+    // m0 = { h4[0], h3[0], h2[0], h1[0], h0[0] }
+    // m1 = { m0[0], m0[1] - 3*m0[0] }
+    // m2 = { m1[0], m1[1] - 2*m1[0], m0[2] - 2*m1[1] }
+    // m3 = { m2[0], m2[1] - 1*m2[0], m2[2] - 1*m2[1], m0[3] - 1*m2[2] };
+    // w  = { m3[0], m3[1], m3[2], m3[3], m0[4] };
+
+    copyNumber(&h4[0], &m0[0]);
+    copyNumber(&h3[0], &m0[1]);
+    copyNumber(&h2[0], &m0[2]);
+    copyNumber(&h1[0], &m0[3]);
+    copyNumber(&h0[0], &m0[4]);
+
+    copyNumber(&m0[0], &m1[0]);
+    multiple(&m0[0], &three, &tmp); sub(&m0[1], &tmp, &m1[1]);
+
+    copyNumber(&m1[0], &m2[0]);
+    multiple(&m1[0], &two, &tmp); sub(&m1[1], &tmp, &m2[1]);
+    multiple(&m1[1], &two, &tmp); sub(&m0[2], &tmp, &m2[2]);
+
+    copyNumber(&m2[0], &m3[0]);
+    sub(&m2[1], &m2[0], &m3[1]);
+    sub(&m2[2], &m2[1], &m3[2]);
+    sub(&m0[3], &m2[2], &m3[3]);
+
+    copyNumber(&m3[0], &w[0]);
+    copyNumber(&m3[1], &w[1]);
+    copyNumber(&m3[2], &w[2]);
+    copyNumber(&m3[3], &w[3]);
+    copyNumber(&m0[4], &w[4]);
+
+    // puts("------------------");
+    // printf("m0[0] = "); dispNumberZeroSuppress(&m0[0]); putchar('\n');
+    // printf("m0[1] = "); dispNumberZeroSuppress(&m0[1]); putchar('\n');
+    // printf("m0[2] = "); dispNumberZeroSuppress(&m0[2]); putchar('\n');
+    // printf("m0[3] = "); dispNumberZeroSuppress(&m0[3]); putchar('\n');
+    // printf("m0[4] = "); dispNumberZeroSuppress(&m0[4]); putchar('\n');
+    // puts("------------------");
+    // printf("m1[0] = "); dispNumberZeroSuppress(&m1[0]); putchar('\n');
+    // printf("m1[1] = "); dispNumberZeroSuppress(&m1[1]); putchar('\n');
+    // puts("------------------");
+    // printf("m2[0] = "); dispNumberZeroSuppress(&m2[0]); putchar('\n');
+    // printf("m2[1] = "); dispNumberZeroSuppress(&m2[1]); putchar('\n');
+    // printf("m2[2] = "); dispNumberZeroSuppress(&m2[2]); putchar('\n');
+    // puts("------------------");
+    // printf("m3[0] = "); dispNumberZeroSuppress(&m3[0]); putchar('\n');
+    // printf("m3[1] = "); dispNumberZeroSuppress(&m3[1]); putchar('\n');
+    // printf("m3[2] = "); dispNumberZeroSuppress(&m3[2]); putchar('\n');
+    // printf("m3[3] = "); dispNumberZeroSuppress(&m3[3]); putchar('\n');
+    //
+    // puts("------------------");
+    // printf("w[0] = "); dispNumberZeroSuppress(&w[0]); putchar('\n');
+    // printf("w[1] = "); dispNumberZeroSuppress(&w[1]); putchar('\n');
+    // printf("w[2] = "); dispNumberZeroSuppress(&w[2]); putchar('\n');
+    // printf("w[3] = "); dispNumberZeroSuppress(&w[3]); putchar('\n');
+    // printf("w[4] = "); dispNumberZeroSuppress(&w[4]); putchar('\n');
+
+    // w0 x^4 + w1 x^3 + w2 x^2 + w3 x + w4
+    // = x (x (x (w0 x + w1) + w2) + w3) + w4   (x = RADIX = 10^RADIX_LEN)
+
+    copyNumber(&w[0], result);
+    mulBy10E(divisionLength * RADIX_LEN, result, &tmp); copyNumber(&tmp, result);
+    add(result, &w[1], &tmp); copyNumber(&tmp, result);
+    mulBy10E(divisionLength * RADIX_LEN, result, &tmp); copyNumber(&tmp, result);
+    add(result, &w[2], &tmp); copyNumber(&tmp, result);
+    mulBy10E(divisionLength * RADIX_LEN, result, &tmp); copyNumber(&tmp, result);
+    add(result, &w[3], &tmp); copyNumber(&tmp, result);
+    mulBy10E(divisionLength * RADIX_LEN, result, &tmp); copyNumber(&tmp, result);
+    add(result, &w[4], &tmp); copyNumber(&tmp, result);
+
+    return 0;
+}
+
 // result <- a * b
 // Return  0 if success
 // Return -1 if overflow
@@ -596,15 +800,15 @@ int multiple(const Number *a, const Number *b, Number *result) {
     //   3. -a * +b  =>  -(|a| *  b )  => setSign(mul(getAbs(a), b), -1)
     //   4. -a * -b  =>    |a| * |b|   => mul(getAbs(a), getAbs(b))
     if (plusA && plusB) {
-        r = multiplePositiveNumber(a, b, result);
+        r = multipleToomCook(a, b, result);
     } else if (plusA && !plusB) {
-        r = multiplePositiveNumber(a, &absB, result);
+        r = multipleToomCook(a, &absB, result);
         setSign(result, -1);
     } else if (!plusA && plusB) {
-        r = multiplePositiveNumber(&absA, b, result);
+        r = multipleToomCook(&absA, b, result);
         setSign(result, -1);
     } else if (!plusA && !plusB) {
-        r = multiplePositiveNumber(&absB, &absA, result);
+        r = multipleToomCook(&absB, &absA, result);
     } else {
         assert(FALSE); // this block cannot be reached
     }

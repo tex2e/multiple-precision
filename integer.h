@@ -62,6 +62,7 @@ typedef int bool;
 // useful macros
 #define MAX(a,b) ((a) > (b) ? a : b)
 #define MIN(a,b) ((a) < (b) ? a : b)
+#define ABS(a) ((a) < 0 ? -(a) : a)
 
 typedef struct NUMBER {
     digit_t n[KETA];
@@ -94,6 +95,7 @@ int increment(const Number*, Number*);
 int decrement(const Number*, Number*);
 int slowMultiplePositiveNumber(const Number*, const Number*, Number*);
 int multiplePositiveNumber(const Number*, const Number*, Number*);
+int multipleToomCook(const Number*, const Number*, Number*);
 int multiple(const Number*, const Number*, Number*);
 int slowDivmodPositiveNumber(const Number*, const Number*, Number*, Number*);
 int divmodPositiveNumber(const Number*, const Number*, Number*, Number*);
