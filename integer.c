@@ -1419,12 +1419,12 @@ int inverseNumber(const Number *num, int prec, Number *result) {
         // next
         expo *= 2;
     }
-    // printf("expo - prec = %d\n", expo - prec);
+    // printf("expo * 2 - prec = %d\n", expo * 2 - prec);
     divBy10E(expo * 2 - prec, &xNext, result);
 
     // printf("result = "); dispNumberZeroSuppress(result); putchar('\n');
 
-    return expo;
+    return 0;
 }
 
 // result <- arctan(1/x) * 1e+digits
