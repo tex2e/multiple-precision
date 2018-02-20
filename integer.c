@@ -1321,7 +1321,7 @@ int slowSqrtNumber(const Number *num, Number *result) {
 //   where num >= 0
 // Return  0 if success
 // Return -1 if num < 0
-// Calculate sqrt with Newton-Raphson method.
+// Calculate sqrt(N) with Newton-Raphson method.
 //   sqrt(N) = x  ->  x^2 = N  ->  x^2 - N = 0
 //   f(x)  = x^2 - N
 //   f'(x) = 2x
@@ -1367,6 +1367,64 @@ int sqrtNumber(const Number *num, Number *result) {
 
     copyNumber(&xNext, result);
     return 0;
+}
+
+// result <- 1/num * 1e+expo
+// Return expo where expo > prec
+// Calculate 1/N with Newton-Raphson method.
+//   1/N = x  ->  1/x - N = 0
+//   f(x)  = 1/x - N
+//   f'(x) = -1/(x)^2
+//   Root-finding algorithm:
+//     x_{n+1} = x_i - f(x_i) / f'(x_i)
+//             = x_n (2 - N (x_n)^2)
+//
+int inverseNumber(const Number *num, int prec, Number *result) {
+    int i, ketaMax;
+    int expo;
+    Number tmp;
+    Number x, xNext;
+    Number term, term1, term2;
+    Number two;
+    setInt(&two, 2);
+    clearByZero(result);
+
+    for (i = KETA - 1; num->n[i] == 0 && i >= 0; i--) {}
+    if (i < 0) return -1;
+    ketaMax = i;
+    expo = ketaMax * RADIX_LEN + log10(num->n[i]) + 1;
+
+    // printf("ketaMax = %d\n", ketaMax);
+    // printf("expo = %d\n", expo);
+
+    setInt(&x, 2);
+
+    // printf("x = "); dispNumberZeroSuppress(&x); putchar('\n');
+
+    while (1) {
+        // x_{n+1} = x_n (2 - N x_n)
+        multiple(num, &x, &tmp); copyNumber(&tmp, &term2);
+        mulBy10E(expo, &two, &term1);
+        // printf("term1 = "); dispNumberZeroSuppress(&term1); putchar('\n');
+        // printf("term2 = "); dispNumberZeroSuppress(&term2); putchar('\n');
+        sub(&term1, &term2, &term);
+        multiple(&x, &term, &xNext);
+
+        // printf("xNext = "); dispNumberZeroSuppress(&xNext); putchar('\n');
+
+        if (expo > prec) break;
+
+        copyNumber(&xNext, &x);
+
+        // next
+        expo *= 2;
+    }
+    // printf("expo - prec = %d\n", expo - prec);
+    divBy10E(expo * 2 - prec, &xNext, result);
+
+    // printf("result = "); dispNumberZeroSuppress(result); putchar('\n');
+
+    return expo;
 }
 
 // result <- arctan(1/x) * 1e+digits
