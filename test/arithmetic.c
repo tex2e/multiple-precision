@@ -160,7 +160,7 @@ void test_divmodByInt() {
     digit_t b, d;
     setInt(&a, 1234500);
     b = 67890;
-    divmodByInt(&a, &b, &c, &d);
+    divmodByInt(&a, b, &c, &d);
     getInt(&c, &div_result);
     mod_result = d;
     my_assert((div_result == div_expected) && "test 1234500 / 67890");
@@ -178,7 +178,7 @@ void test_divmodByInt_big() {
     digit_t b, d;
     setInt(&a, 12345); mulBy10E(100, &a, &tmp); copyNumber(&tmp, &a);
     b = 67890;
-    divmodByInt(&a, &b, &c, &d);
+    divmodByInt(&a, b, &c, &d);
     getStr(&c, div_result);
     mod_result = d;
     my_assert((strcmp(div_result, div_expected) == 0) && "test 12345E100 / 67890");
