@@ -589,7 +589,6 @@ int multipleToomCook(const Number *a, const Number *b, Number *result) {
     Number a_d1, a_d2, a_d3;
     Number b_d1, b_d2, b_d3;
     Number two, three;
-    digit_t two_ = 2, three_ = 3, four_ = 4;
     digit_t rem_;
     setInt(&two, 2);
     setInt(&three, 3);
@@ -683,12 +682,12 @@ int multipleToomCook(const Number *a, const Number *b, Number *result) {
     sub(&h0[2], &h0[1], &h1[1]);
     sub(&h0[3], &h0[2], &h1[2]);
     sub(&h0[4], &h0[3], &h1[3]);
-    sub(&h1[1], &h1[0], &tmp); divmodByInt(&tmp, &two_, &h2[0], &rem_);
-    sub(&h1[2], &h1[1], &tmp); divmodByInt(&tmp, &two_, &h2[1], &rem_);
-    sub(&h1[3], &h1[2], &tmp); divmodByInt(&tmp, &two_, &h2[2], &rem_);
-    sub(&h2[1], &h2[0], &tmp); divmodByInt(&tmp, &three_, &h3[0], &rem_);
-    sub(&h2[2], &h2[1], &tmp); divmodByInt(&tmp, &three_, &h3[1], &rem_);
-    sub(&h3[1], &h3[0], &tmp); divmodByInt(&tmp, &four_, &h4[0], &rem_);
+    sub(&h1[1], &h1[0], &tmp); divmodByInt(&tmp, 2, &h2[0], &rem_);
+    sub(&h1[2], &h1[1], &tmp); divmodByInt(&tmp, 2, &h2[1], &rem_);
+    sub(&h1[3], &h1[2], &tmp); divmodByInt(&tmp, 2, &h2[2], &rem_);
+    sub(&h2[1], &h2[0], &tmp); divmodByInt(&tmp, 3, &h3[0], &rem_);
+    sub(&h2[2], &h2[1], &tmp); divmodByInt(&tmp, 3, &h3[1], &rem_);
+    sub(&h3[1], &h3[0], &tmp); divmodByInt(&tmp, 4, &h4[0], &rem_);
 
     // printf("h0[0] = "); dispNumberZeroSuppress(&h0[0]); putchar('\n');
     // printf("h0[1] = "); dispNumberZeroSuppress(&h0[1]); putchar('\n');
@@ -878,7 +877,7 @@ int divmodPositiveNumber(const Number *a, const Number *b, Number *q, Number *m)
         digit_t divisor_;
         digit_t rem_;
         getInt(&divisor, &divisor_);
-        r = divmodPositiveNumberByInt(a, &divisor_, q, &rem_);
+        r = divmodPositiveNumberByInt(a, divisor_, q, &rem_);
         setInt(m, rem_);
         return r;
     }
@@ -970,12 +969,12 @@ int divmod(const Number *a, const Number *b, Number *quo, Number *mod) {
 //   where a >= 0, b >= 0, b is instance of int
 // Return  0 if success
 // Return -1 if division by zero (b == 0)
-int divmodPositiveNumberByInt(const Number *a, const digit_t *b, Number *q, digit_t *m) {
+int divmodPositiveNumberByInt(const Number *a, digit_t b, Number *q, digit_t *m) {
     int i, j;
     int begin;
     Number tmp;
     digit_t num; // store a midway state of division
-    digit_t divisor = *b;
+    digit_t divisor = b;
     digit_t division, remain;
     digit_t next;
     Number result;
@@ -1018,14 +1017,14 @@ int divmodPositiveNumberByInt(const Number *a, const digit_t *b, Number *q, digi
 // a / b = quo ... mod
 // Return  0 if success
 // Return -1 if divided by zero (b == 0)
-int divmodByInt(const Number *a, const digit_t *b, Number *quo, digit_t *mod) {
+int divmodByInt(const Number *a, digit_t b, Number *quo, digit_t *mod) {
     int r = 0;
     bool plusA = (getSign(a) == 1);
     bool plusB = (b >= 0);
     Number absA;
     digit_t absB;
     getAbs(a, &absA);
-    absB = (plusB) ? *b: -(*b);
+    absB = (plusB) ? b: -(b);
 
     // there are 4 cases
     //   1. +a / +b  =>     a  /  b    => div(a, b)
@@ -1039,14 +1038,14 @@ int divmodByInt(const Number *a, const digit_t *b, Number *quo, digit_t *mod) {
     if (plusA && plusB) {
         r = divmodPositiveNumberByInt(a, b, quo, mod);
     } else if (plusA && !plusB) {
-        r = divmodPositiveNumberByInt(a, &absB, quo, mod);
+        r = divmodPositiveNumberByInt(a, absB, quo, mod);
         setSign(quo, -1);
     } else if (!plusA && plusB) {
         r = divmodPositiveNumberByInt(&absA, b, quo, mod);
         setSign(quo, -1);
         *mod *= -1;
     } else if (!plusA && !plusB) {
-        r = divmodPositiveNumberByInt(&absA, &absB, quo, mod);
+        r = divmodPositiveNumberByInt(&absA, absB, quo, mod);
         *mod *= -1;
     } else {
         assert(FALSE); // this block cannot be reached
@@ -1339,7 +1338,6 @@ int sqrtNumber(const Number *num, Number *result) {
     Number tmp, tmp2;
     Number xNext, x, xPrev;
     Number two;
-    digit_t two_ = 2;
     digit_t rem;
     copyNumber(num, &x);
     clearByZero(&xNext);
@@ -1352,7 +1350,7 @@ int sqrtNumber(const Number *num, Number *result) {
         // xNext = (x + (num / x)) / 2
         divmod(num, &x, &tmp, &_);
         add(&x, &tmp, &tmp2);
-        divmodByInt(&tmp2, &two_, &xNext, &rem);
+        divmodByInt(&tmp2, 2, &xNext, &rem);
 
         if (compNumber(&xNext, &x) == 0) break; // converge
         if (compNumber(&xNext, &xPrev) == 0) {  // oscillate
