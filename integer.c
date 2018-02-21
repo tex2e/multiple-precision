@@ -1041,57 +1041,12 @@ int power(const Number *a, const Number *b, Number *c) {
 //   where num >= 0
 // Return TRUE  if num is prime
 // Return FALSE if num is not prime
-bool isPrime(const Number *_num) {
-    int step;
-    Number _;
-    Number tmp;
-    Number zero, two, four;
-    Number num = *_num;
-    Number divisor;
-    Number max;
-    Number remain;
-    setInt(&zero, 0);
-    setInt(&two, 2);
-    setInt(&four, 4);
-    clearByZero(&remain);
-
-    sqrtNumber(&num, &max);
-
-    // 徐数列: 2,3,5,7,11,13,17,19,23,25,29,...
-    // 最初の3項の次に 2 と 4 を交互に加えていったものを使用
-    // 素数ではない 25,36,49 なども徐数列に含まれる
-
-    setInt(&divisor, 2);
-    divmod(&num, &divisor, &_, &remain);
-    if (compNumber(&remain, &zero) == 0) return FALSE;
-
-    setInt(&divisor, 3);
-    divmod(&num, &divisor, &_, &remain);
-    if (compNumber(&remain, &zero) == 0) return FALSE;
-
-    setInt(&divisor, 5);
-    divmod(&num, &divisor, &_, &remain);
-    if (compNumber(&remain, &zero) == 0) return FALSE;
-
-    step = 2;
-    while (1) {
-        if (compNumber(&divisor, &max) > 0) break;
-
-        if (step == 2) {
-            add(&divisor, &two, &tmp); copyNumber(&tmp, &divisor); // divisor += 2
-            step = 4; // for next
-        } else {
-            add(&divisor, &four, &tmp); copyNumber(&tmp, &divisor); // divisor += 4
-            step = 2; // for next
-        }
-
-        divmod(&num, &divisor, &_, &remain);
-        if (compNumber(&remain, &zero) == 0) {
-            return FALSE;
-        }
-    }
-
-    return TRUE;
+bool isPrime(const Number *num) {
+    Number factors[1];
+    int r = factorizeNumber(num, factors, 0);
+    // r == 0  means there is no prime factors in num. Therefore it's a prime number.
+    // r == -1 means factorizeNumber found a prime factor but cannot store in +factors+.
+    return (r == 0);
 }
 
 // factors <- factorize(60) == {2,2,3,5}
@@ -1126,7 +1081,7 @@ int factorizeNumber(const Number *_num, Number *factors, int maxFactors) {
             setInt(&divisor, primes[prime_i]);
             divmod(&num, &divisor, &quot, &remain);
             if (compNumber(&remain, &zero) == 0) {
-                if (factor_i == maxFactors) return -1;
+                if (factor_i >= maxFactors) return -1;
                 factors[factor_i++] = divisor;
                 copyNumber(&quot, &num);
                 isPrimeNumber = FALSE;
