@@ -925,7 +925,8 @@ int divmodPositiveNumber(const Number *a, const Number *b, Number *q, Number *m)
     return 0;
 }
 
-// a / b = quo ... mod
+// quo <- a / b
+// mod <- a % b
 // Return  0 if success
 // Return -1 if divided by zero (b == 0)
 int divmod(const Number *a, const Number *b, Number *quo, Number *mod) {
@@ -1378,7 +1379,8 @@ int sqrtNumber(const Number *num, Number *result) {
 //             = x_n (2 - N (x_n)^2)
 //
 int inverseNumber(const Number *num, int prec, Number *result) {
-    int i, ketaMax;
+    int i, maxKeta;
+    int left, right;
     int expo;
     Number tmp;
     Number x, xNext;
@@ -1389,15 +1391,19 @@ int inverseNumber(const Number *num, int prec, Number *result) {
 
     for (i = KETA - 1; num->n[i] == 0 && i >= 0; i--) {}
     if (i < 0) return -1;
-    ketaMax = i;
-    expo = ketaMax * RADIX_LEN + log10(num->n[i]) + 1;
+    maxKeta = i;
+    expo = maxKeta * RADIX_LEN + log10(num->n[i]) + 1;
 
-    // printf("ketaMax = %d\n", ketaMax);
+    // printf("maxKeta = %d\n", maxKeta);
     // printf("expo = %d\n", expo);
+    // printf("prec = %d\n", prec);
 
     setInt(&x, 2);
 
     // printf("x = "); dispNumberZeroSuppress(&x); putchar('\n');
+
+    int validDigits = 3;
+    // printf("validDigits = %d\n", validDigits);
 
     while (1) {
         // x_{n+1} = x_n (2 - N x_n)
@@ -1408,14 +1414,15 @@ int inverseNumber(const Number *num, int prec, Number *result) {
         sub(&term1, &term2, &term);
         multiple(&x, &term, &xNext);
 
-        // printf("xNext = "); dispNumberZeroSuppress(&xNext); putchar('\n');
+        // printf("xNext_%d = ", i++); dispNumberZeroSuppress(&xNext); putchar('\n');
 
-        if (expo > prec) break;
+        if (validDigits > prec) break;
 
         copyNumber(&xNext, &x);
 
         // next
         expo *= 2;
+        validDigits *= 2;
     }
     // printf("expo * 2 - prec = %d\n", expo * 2 - prec);
     divBy10E(expo * 2 - prec, &xNext, result);
