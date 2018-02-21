@@ -24,5 +24,7 @@ void test_inverseNumber() {
     setInt(&a, 56);
     expo_result = inverseNumber(&a, 20, &b);
     getStr(&b, result);
+    // printf("expected = %s\n", expected);
+    // printf("result   = %s\n", result);
     my_assert((strcmp(result, expected) == 0) && "test 1/56");
 }
