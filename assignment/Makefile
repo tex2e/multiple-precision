@@ -24,7 +24,7 @@ exec:
 	@for file in $(patsubst %.c,%.exe,$(C_FILES)); do \
 		echo "===== $$file ====="; \
 		time ./$$file; \
-		echo \
+		echo; \
 	done
 
 clean:
