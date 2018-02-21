@@ -17,7 +17,6 @@ int main(void) {
     Number divisor, quot, remain, max;
     Number R_n;
     Number one, two, zero, five;
-    digit_t nine_ = 9;
     digit_t rem;
     bool isPrimeNumber;
 
@@ -34,7 +33,7 @@ int main(void) {
 
         // R_n = (10^n - 1) / 9
         decrement(&base, &numer);
-        divmodByInt(&numer, &nine_, &R_n, &rem);
+        divmodByInt(&numer, 9, &R_n, &rem);
 
         getStr(&R_n, result);
         printf("R_%d = %s", n, result);

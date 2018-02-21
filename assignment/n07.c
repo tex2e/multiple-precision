@@ -28,7 +28,6 @@ int main(void) {
     Number denom1;
     Number result;
     Number prec;
-    digit_t three = 3;
     digit_t rem;
     setInt(&one, 1);
     setInt(&fortytwo, 42);
@@ -78,7 +77,7 @@ int main(void) {
         multiple(&denom1, &minusTwentyseven, &tmp); copyNumber(&tmp, &denom1);
     }
 
-    divmodByInt(&result, &three, &tmp, &rem); copyNumber(&tmp, &result); // result /= 3
+    divmodByInt(&result, 3, &tmp, &rem); copyNumber(&tmp, &result); // result /= 3
 
     divBy10E(extraDigits, &result, &tmp); copyNumber(&tmp, &result);
 
