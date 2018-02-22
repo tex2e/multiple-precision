@@ -1075,6 +1075,7 @@ int factorizeNumber(const Number *_num, Number *factors, int maxFactors) {
     // 徐数列: 2,3,5,7,11,13,17,19,23,25,29,...
     // 最初の3項の次に 2 と 4 を交互に加えていったものを使用
     // 素数ではない 25,36,49 なども徐数列に含まれる
+    // 5の倍数を除くと 20% の計算時間の節約
 
     for (prime_i = 0; prime_i < 3; prime_i++) {
         while (1) {
