@@ -14,13 +14,10 @@ void test_mul();
 void test_mul_big();
 void test_divmod();
 void test_divmod_big();
-void test_divmodByInt();
-void test_divmodByInt_big();
 void test_power();
 void test_power_big();
 void test_isPrime();
 void test_factorialNumber();
-void test_multipleToomCook();
 
 int main(void) {
     test_add();
@@ -31,13 +28,10 @@ int main(void) {
     test_mul_big();
     test_divmod();
     test_divmod_big();
-    test_divmodByInt(); // private method
-    test_divmodByInt_big(); // private method
     test_power();
     test_power_big();
     test_isPrime();
     test_factorialNumber();
-    test_multipleToomCook(); // private method
 
     printf("Finish all tests.\n");
 }
@@ -150,41 +144,6 @@ void test_divmod_big() {
     my_assert((strcmp(mod_result, mod_expected) == 0) && "test 12345E100 %% 67890E50");
 }
 
-void test_divmodByInt() {
-    printf("* test_divmodByInt\n");
-    digit_t div_expected = 18;
-    digit_t div_result;
-    digit_t mod_expected = 12480;
-    digit_t mod_result;
-    Number a, c;
-    digit_t b, d;
-    setInt(&a, 1234500);
-    b = 67890;
-    divmodByInt(&a, b, &c, &d);
-    getInt(&c, &div_result);
-    mod_result = d;
-    my_assert((div_result == div_expected) && "test 1234500 / 67890");
-    my_assert((mod_result == mod_expected) && "test 1234500 %% 67890");
-}
-
-void test_divmodByInt_big() {
-    printf("* test_divmodByInt_big\n");
-    char* div_expected = "1818382677861246133451171011931064958020326999558108705258506407423773751657092355280600972160848431";
-    char div_result[KETA * RADIX_LEN + 2];
-    digit_t mod_expected = 19410;
-    digit_t mod_result;
-    Number tmp;
-    Number a, c;
-    digit_t b, d;
-    setInt(&a, 12345); mulBy10E(100, &a, &tmp); copyNumber(&tmp, &a);
-    b = 67890;
-    divmodByInt(&a, b, &c, &d);
-    getStr(&c, div_result);
-    mod_result = d;
-    my_assert((strcmp(div_result, div_expected) == 0) && "test 12345E100 / 67890");
-    my_assert((mod_result == mod_expected) && "test 12345E100 %% 67890");
-}
-
 void test_power() {
     printf("* test_power\n");
     digit_t expected = pow(2, 20);
@@ -227,30 +186,4 @@ void test_factorialNumber() {
     factorialNumber(&a, &b);
     getStr(&b, result);
     my_assert((strcmp(result, expected) == 0) && "test 10!");
-}
-
-void test_multipleToomCook() {
-    printf("* test_multipleToomCook\n");
-    {
-        char* expected = "83811881229243229121248102050";
-        char result[KETA * RADIX_LEN + 2];
-        Number a, b, c;
-        Number tmp;
-        setInt(&a, 123451234512345);
-        setInt(&b, 678906789067890);
-        multipleToomCook(&a, &b, &c);
-        getStr(&c, result);
-        my_assert((strcmp(result, expected) == 0) && "test 12345E50 * 67890");
-    }
-    {
-        char* expected = "8381020500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
-        char result[KETA * RADIX_LEN + 2];
-        Number a, b, c;
-        Number tmp;
-        setInt(&a, 12345); mulBy10E(50, &a, &tmp); copyNumber(&tmp, &a);
-        setInt(&b, 67890); mulBy10E(50, &b, &tmp); copyNumber(&tmp, &b);
-        multipleToomCook(&a, &b, &c);
-        getStr(&c, result);
-        my_assert((strcmp(result, expected) == 0) && "test 12345E50 * 67890E50");
-    }
 }
