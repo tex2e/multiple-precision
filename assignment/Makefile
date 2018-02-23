@@ -10,11 +10,11 @@ n02.exe: MACROS = -D KETA='(1100/RADIX_LEN+10)'
 n03.exe: MACROS = -D KETA='(1100/RADIX_LEN+10)'
 n04.exe: MACROS = -D KETA='(3570/RADIX_LEN+10)'
 n05.exe: MACROS = -D KETA='(2000/RADIX_LEN+10)'
-n06.exe: MACROS = -D KETA='(1000/RADIX_LEN+10)'
+n06.exe: MACROS = -D KETA='(1100/RADIX_LEN+10)'
 n07.exe: MACROS = -D KETA='(1000/RADIX_LEN+10)'
-n08.exe: MACROS = -D KETA='(30/RADIX_LEN)'
+n08.exe: MACROS = -D KETA='(50/RADIX_LEN)'
 n09.exe: MACROS = -D KETA='(1000/RADIX_LEN+10)'
-n10.exe: MACROS = -D KETA='(30/RADIX_LEN)'
+n10.exe: MACROS = -D KETA='(50/RADIX_LEN)'
 
 %.exe: %.c ../integer.c ../integer.h Makefile
 	gcc -O3 $(MACROS) -c ../integer.c -o $(basename $<)-integer.o
