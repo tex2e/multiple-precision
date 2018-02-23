@@ -579,142 +579,6 @@ int multiplePositiveNumber(const Number *a, const Number *b, Number *result) {
 }
 
 // result <- a * b
-//   where a >= 0, b >= 0
-// Return  0 if success
-// Return -1 if overflow
-// Using Toom-Cook 3-way multiplication algorithm.
-int multipleToomCook(const Number *a, const Number *b, Number *result) {
-    int i, di, x_;
-    int aiMax, biMax, iMax;
-    int d1iMax, d2iMax, d3iMax, divisionLength;
-    Number h0[5], h1[4], h2[3], h3[2], h4[1];
-    Number m0[5], m1[2], m2[3], m3[4], w[5];
-    Number tmp;
-    Number x, ux, vx;
-    Number a_d1, a_d2, a_d3;
-    Number b_d1, b_d2, b_d3;
-    Number two, three;
-    digit_t _;
-    setInt(&two, 2);
-    setInt(&three, 3);
-    clearByZero(result);
-
-    // 分割数d = 3
-    // 必要な係数wの数 = 2d - 1 = 5
-
-    for (i = KETA - 1; i != 0 && a->n[i] == 0; i--) ;
-    aiMax = MIN(i + 1, KETA - 1);
-    for (i = KETA - 1; i != 0 && b->n[i] == 0; i--) ;
-    biMax = MIN(i + 1, KETA - 1);
-    iMax = MAX(aiMax, biMax);
-
-    if (aiMax <= 3 || biMax <= 3) {
-        return multiplePositiveNumber(a, b, result);
-    }
-
-    d1iMax = (int)ceil(iMax / 3.0);
-    d2iMax = d1iMax * 2;
-    d3iMax = iMax;
-    divisionLength = d1iMax;
-
-    clearByZero(&a_d1);
-    clearByZero(&a_d2);
-    clearByZero(&a_d3);
-    clearByZero(&b_d1);
-    clearByZero(&b_d2);
-    clearByZero(&b_d3);
-    for (di = i = 0; i < d1iMax; di++, i++) {
-        a_d3.n[di] = a->n[i];
-        b_d3.n[di] = b->n[i];
-    }
-    for (di = 0, i = d1iMax; i < d2iMax; di++, i++) {
-        a_d2.n[di] = a->n[i];
-        b_d2.n[di] = b->n[i];
-    }
-    for (di = 0, i = d2iMax; i <= d3iMax; di++, i++) {
-        a_d1.n[di] = a->n[i];
-        b_d1.n[di] = b->n[i];
-    }
-
-    for (x_ = 0; x_ < 5; x_++) {
-        setInt(&x, x_);
-
-        // ux = a_d1 * x^2 + a_d2 * x + a_d3
-        //    = x (a_d1 x + a_d2) + a_d3
-        copyNumber(&a_d1, &ux);
-        multiple(&x, &ux, &tmp); copyNumber(&tmp, &ux);
-        add(&ux, &a_d2, &tmp); copyNumber(&tmp, &ux);
-        multiple(&x, &ux, &tmp); copyNumber(&tmp, &ux);
-        add(&ux, &a_d3, &tmp); copyNumber(&tmp, &ux);
-
-        // vx = b_d1 * x^2 + b_d2 * x + b_d3
-        //    = x (b_d1 x + b_d2) + b_d3
-        copyNumber(&b_d1, &vx);
-        multiple(&x, &vx, &tmp); copyNumber(&tmp, &vx);
-        add(&vx, &b_d2, &tmp); copyNumber(&tmp, &vx);
-        multiple(&x, &vx, &tmp); copyNumber(&tmp, &vx);
-        add(&vx, &b_d3, &tmp); copyNumber(&tmp, &vx);
-
-        // h0[x] = ux * vx
-        multiple(&ux, &vx, &h0[x_]);
-    }
-
-    sub(&h0[1], &h0[0], &h1[0]); // h1[0] = h0[1] - h0[0];
-    sub(&h0[2], &h0[1], &h1[1]); // h1[1] = h0[2] - h0[1];
-    sub(&h0[3], &h0[2], &h1[2]); // h1[2] = h0[3] - h0[2];
-    sub(&h0[4], &h0[3], &h1[3]); // h1[3] = h0[4] - h0[3];
-    sub(&h1[1], &h1[0], &tmp); divmodByInt(&tmp, 2, &h2[0], &_); // h2[0] = (h1[1] - h1[0])/2;
-    sub(&h1[2], &h1[1], &tmp); divmodByInt(&tmp, 2, &h2[1], &_); // h2[1] = (h1[2] - h1[1])/2;
-    sub(&h1[3], &h1[2], &tmp); divmodByInt(&tmp, 2, &h2[2], &_); // h2[2] = (h1[3] - h1[2])/2;
-    sub(&h2[1], &h2[0], &tmp); divmodByInt(&tmp, 3, &h3[0], &_); // h3[0] = (h2[1] - h2[0])/3;
-    sub(&h2[2], &h2[1], &tmp); divmodByInt(&tmp, 3, &h3[1], &_); // h3[1] = (h2[2] - h2[1])/3;
-    sub(&h3[1], &h3[0], &tmp); divmodByInt(&tmp, 4, &h4[0], &_); // h4[0] = (h3[1] - h3[0])/4;
-
-    // m0 = { h4[0], h3[0], h2[0], h1[0], h0[0] }
-    copyNumber(&h4[0], &m0[0]);
-    copyNumber(&h3[0], &m0[1]);
-    copyNumber(&h2[0], &m0[2]);
-    copyNumber(&h1[0], &m0[3]);
-    copyNumber(&h0[0], &m0[4]);
-
-    // m1 = { m0[0], m0[1] - 3*m0[0] }
-    copyNumber(&m0[0], &m1[0]);
-    multiple(&m0[0], &three, &tmp); sub(&m0[1], &tmp, &m1[1]);
-
-    // m2 = { m1[0], m1[1] - 2*m1[0], m0[2] - 2*m1[1] }
-    copyNumber(&m1[0], &m2[0]);
-    multiple(&m1[0], &two, &tmp); sub(&m1[1], &tmp, &m2[1]);
-    multiple(&m1[1], &two, &tmp); sub(&m0[2], &tmp, &m2[2]);
-
-    // m3 = { m2[0], m2[1] - 1*m2[0], m2[2] - 1*m2[1], m0[3] - 1*m2[2] };
-    copyNumber(&m2[0], &m3[0]);
-    sub(&m2[1], &m2[0], &m3[1]);
-    sub(&m2[2], &m2[1], &m3[2]);
-    sub(&m0[3], &m2[2], &m3[3]);
-
-    // w  = { m3[0], m3[1], m3[2], m3[3], m0[4] };
-    copyNumber(&m3[0], &w[0]);
-    copyNumber(&m3[1], &w[1]);
-    copyNumber(&m3[2], &w[2]);
-    copyNumber(&m3[3], &w[3]);
-    copyNumber(&m0[4], &w[4]);
-
-    //   w0 x^4 + w1 x^3 + w2 x^2 + w3 x + w4
-    // = x (x (x (w0 x + w1) + w2) + w3) + w4   (x = RADIX = 10^RADIX_LEN)
-    copyNumber(&w[0], result);
-    mulBy10E(divisionLength * RADIX_LEN, result, &tmp); copyNumber(&tmp, result);
-    add(result, &w[1], &tmp); copyNumber(&tmp, result);
-    mulBy10E(divisionLength * RADIX_LEN, result, &tmp); copyNumber(&tmp, result);
-    add(result, &w[2], &tmp); copyNumber(&tmp, result);
-    mulBy10E(divisionLength * RADIX_LEN, result, &tmp); copyNumber(&tmp, result);
-    add(result, &w[3], &tmp); copyNumber(&tmp, result);
-    mulBy10E(divisionLength * RADIX_LEN, result, &tmp); copyNumber(&tmp, result);
-    add(result, &w[4], &tmp); copyNumber(&tmp, result);
-
-    return 0;
-}
-
-// result <- a * b
 // Return  0 if success
 // Return -1 if overflow
 int multiple(const Number *a, const Number *b, Number *result) {
@@ -732,15 +596,15 @@ int multiple(const Number *a, const Number *b, Number *result) {
     //   3. -a * +b  =>  -(|a| *  b )  => setSign(mul(getAbs(a), b), -1)
     //   4. -a * -b  =>    |a| * |b|   => mul(getAbs(a), getAbs(b))
     if (plusA && plusB) {
-        r = multipleToomCook(a, b, result);
+        r = multiplePositiveNumber(a, b, result);
     } else if (plusA && !plusB) {
-        r = multipleToomCook(a, &absB, result);
+        r = multiplePositiveNumber(a, &absB, result);
         setSign(result, -1);
     } else if (!plusA && plusB) {
-        r = multipleToomCook(&absA, b, result);
+        r = multiplePositiveNumber(&absA, b, result);
         setSign(result, -1);
     } else if (!plusA && !plusB) {
-        r = multipleToomCook(&absB, &absA, result);
+        r = multiplePositiveNumber(&absB, &absA, result);
     } else {
         assert(FALSE); // this block cannot be reached
     }
@@ -858,47 +722,6 @@ int divmodPositiveNumber(const Number *a, const Number *b, Number *q, Number *m)
     return 0;
 }
 
-// quo <- a / b
-// mod <- a % b
-// Return  0 if success
-// Return -1 if divided by zero (b == 0)
-int divmod(const Number *a, const Number *b, Number *quo, Number *mod) {
-    int r = 0;
-    bool plusA = (getSign(a) == 1);
-    bool plusB = (getSign(b) == 1);
-    Number absA;
-    Number absB;
-    getAbs(a, &absA);
-    getAbs(b, &absB);
-
-    // there are 4 cases
-    //   1. +a / +b  =>     a  /  b    => div(a, b)
-    //      +a % +b  =>     a  %  b    => mod(a, b)
-    //   2. +a / -b  =>  -( a  / |b|)  => setSign(div(a, getAbs(b)), -1)
-    //      +a % -b  =>     a  % |b|   =>         mod(a, getAbs(b))
-    //   3. -a / +b  =>  -(|a| /  b )  => setSign(div(getAbs(a), b), -1)
-    //      -a % +b  =>  -(|a| %  b )  => setSign(mod(getAbs(a), b), -1)
-    //   4. -a / -b  =>    |a| / |b|   =>         div(getAbs(a), getAbs(b))
-    //      -a % -b  =>  -(|a| % |b|)  => setSign(mod(getAbs(a), getAbs(b)), -1)
-    if (plusA && plusB) {
-        r = divmodPositiveNumber(a, b, quo, mod);
-    } else if (plusA && !plusB) {
-        r = divmodPositiveNumber(a, &absB, quo, mod);
-        setSign(quo, -1);
-    } else if (!plusA && plusB) {
-        r = divmodPositiveNumber(&absA, b, quo, mod);
-        setSign(quo, -1);
-        setSign(mod, -1);
-    } else if (!plusA && !plusB) {
-        r = divmodPositiveNumber(&absA, &absB, quo, mod);
-        setSign(mod, -1);
-    } else {
-        assert(FALSE); // this block cannot be reached
-    }
-
-    return r;
-}
-
 // a / b = q ... m
 //   where a >= 0, b >= 0, b is instance of int
 // Return  0 if success
@@ -948,17 +771,142 @@ int divmodPositiveNumberByInt(const Number *a, digit_t b, Number *q, digit_t *m)
     return 0;
 }
 
-// a / b = quo ... mod
+// a / b = q ... m
+//   where a >= 0, b >= 0
+// Return  0 if success
+// Return -1 if division by zero (b == 0)
+int divmodKunthAlgorithmD(const Number *_a, const Number *_b, Number *q, Number *m) {
+    int i;
+    int s, t;
+    int u;
+    digit_t k_, qh_, rh_;
+    digit_t rem_;
+    Number tmp, _;
+    Number a = *_a;
+    Number b = *_b;
+    Number k, radix;
+    Number numer, denom; // numer/denom
+    Number qh, rh;
+    Number leftside, rightside;
+    Number term, term1, term2;
+    Number one;
+    Number digitMax;
+    DIV_t divResult;
+
+    setInt(&radix, RADIX);
+    setInt(&one, 1);
+    clearByZero(q);
+
+    if (isZero(&b)) return -1;
+
+    if (compNumber(&a, &b) < 0) {
+        setInt(q, 0);
+        copyNumber(&a, m);
+        return 0;
+    }
+
+    for (i = KETA - 1; a.n[i] == 0 && i >= 0; i--) {}
+    s = i; // aiMax
+    for (i = KETA - 1; b.n[i] == 0 && i >= 0; i--) {}
+    t = i; // biMax
+
+    // use divmodByInt if b < RADIX
+    if (t == 0) {
+        int r;
+        digit_t divisor_;
+        digit_t rem_;
+        getInt(&b, &divisor_);
+        r = divmodPositiveNumberByInt(_a, divisor_, q, &rem_);
+        setInt(m, rem_);
+        return r;
+    }
+
+    k_ = RADIX / (1 + b.n[t]);
+    setInt(&k, k_);
+    multiple(&a, &k, &tmp); copyNumber(&tmp, &a);
+    multiple(&b, &k, &tmp); copyNumber(&tmp, &b);
+
+    // printf("\n\n=====\n");
+    // printf("k = "); dispNumberZeroSuppress(&k); putchar('\n');
+    // printf("a = "); dispNumberZeroSuppress(&a); putchar('\n');
+
+    // Calculate quotient.
+    int isFirst = 1;
+    while (1) {
+        for (i = KETA - 1; a.n[i] == 0 && i >= 0; i--) {}
+        s = i; // aiMax
+        s += isFirst;
+
+        // printf("a = "); dispNumberZeroSuppress(&a); putchar('\n');
+        // printf("b = "); dispNumberZeroSuppress(&b); putchar('\n');
+        // printf("s = %d, t = %d\n", s, t);
+
+        u = (a.n[s] < b.n[t]) ? s - t - 1 : s - t;
+        // printf("qh, rh = divmod(%ld, %ld)\n", a.n[s] * RADIX + a.n[s-1], b.n[t]);
+        divResult = DIV(a.n[s] * RADIX + a.n[s-1], b.n[t]);
+        qh_ = divResult.quot; // qh = (a.n[s] * RADIX + a.n[s-1]) / b.n[t];
+        rh_ = divResult.rem;  // rh = (a.n[s] * RADIX + a.n[s-1]) % b.n[t];
+
+        // q' b[t-1] > D r' + a[s-2]
+        // printf("adjustment\n");
+        // printf("u = %d, qh = %ld, rh = %ld\n", u, qh_, rh_);
+        while (rh_ < RADIX && qh_ * b.n[t-1] > RADIX * rh_ + a.n[s-2]) {
+            qh_ -= 1;
+            rh_ += b.n[t];
+            // printf("u = %d, qh = %ld, rh = %ld\n", u, qh_, rh_);
+        }
+
+        q->n[u] = qh_;
+        // printf("u = %d, qh = %ld\n", u, qh_);
+        // printf("q = "); dispNumberZeroSuppress(q); putchar('\n');
+
+        // a -= b * qh * radix^u
+        Number b_radix_u; // b * radix^u
+        mulBy10E(u * RADIX_LEN, &b, &b_radix_u);
+
+        setInt(&qh, qh_);
+        multiple(&b_radix_u, &qh, &term);
+        sub(&a, &term, &tmp); copyNumber(&tmp, &a);
+        if (getSign(&a) == -1) {
+            q->n[u] -= 1;
+            // printf("aNext = "); dispNumberZeroSuppress(&a); putchar('\n');
+            add(&a, &b_radix_u, &tmp); copyNumber(&tmp, &a);
+            // printf("adjusted aNext = "); dispNumberZeroSuppress(&a); putchar('\n');
+        }
+        if (getSign(&a) == -1) {
+            fprintf(stderr, "divmodKunthAlgorithmD: something get wrong.\n");
+            printf("a = "); dispNumberZeroSuppress(_a); putchar('\n');
+            printf("b = "); dispNumberZeroSuppress(_b); putchar('\n');
+            puts("---");
+            exit(1);
+            return -1;
+        }
+
+        // printf("u = %d\n", u);
+        if (u <= 0) break;
+        // puts("---");
+        isFirst = 0;
+    }
+
+    // Calculate remainder.
+    divmodPositiveNumberByInt(&a, k_, m, &rem_);
+
+    return 0;
+}
+
+// quo <- a / b
+// mod <- a % b
 // Return  0 if success
 // Return -1 if divided by zero (b == 0)
-int divmodByInt(const Number *a, digit_t b, Number *quo, digit_t *mod) {
+int divmod(const Number *a, const Number *b, Number *quo, Number *mod) {
     int r = 0;
     bool plusA = (getSign(a) == 1);
-    bool plusB = (b >= 0);
+    bool plusB = (getSign(b) == 1);
     Number absA;
-    digit_t absB;
+    Number absB;
+    Number quoRes, modRes;
     getAbs(a, &absA);
-    absB = (plusB) ? b: -(b);
+    getAbs(b, &absB);
 
     // there are 4 cases
     //   1. +a / +b  =>     a  /  b    => div(a, b)
@@ -970,20 +918,22 @@ int divmodByInt(const Number *a, digit_t b, Number *quo, digit_t *mod) {
     //   4. -a / -b  =>    |a| / |b|   =>         div(getAbs(a), getAbs(b))
     //      -a % -b  =>  -(|a| % |b|)  => setSign(mod(getAbs(a), getAbs(b)), -1)
     if (plusA && plusB) {
-        r = divmodPositiveNumberByInt(a, b, quo, mod);
+        r = divmodKunthAlgorithmD(a, b, &quoRes, &modRes);
     } else if (plusA && !plusB) {
-        r = divmodPositiveNumberByInt(a, absB, quo, mod);
-        setSign(quo, -1);
+        r = divmodKunthAlgorithmD(a, &absB, &quoRes, &modRes);
+        setSign(&quoRes, -1);
     } else if (!plusA && plusB) {
-        r = divmodPositiveNumberByInt(&absA, b, quo, mod);
-        setSign(quo, -1);
-        *mod *= -1;
+        r = divmodKunthAlgorithmD(&absA, b, &quoRes, &modRes);
+        setSign(&quoRes, -1);
+        setSign(&modRes, -1);
     } else if (!plusA && !plusB) {
-        r = divmodPositiveNumberByInt(&absA, absB, quo, mod);
-        *mod *= -1;
+        r = divmodKunthAlgorithmD(&absA, &absB, &quoRes, &modRes);
+        setSign(&modRes, -1);
     } else {
         assert(FALSE); // this block cannot be reached
     }
+    copyNumber(&quoRes, quo);
+    copyNumber(&modRes, mod);
 
     return r;
 }
@@ -1228,7 +1178,6 @@ int sqrtNumber(const Number *num, Number *result) {
     Number tmp, tmp2;
     Number xNext, x, xPrev;
     Number two;
-    digit_t rem;
     copyNumber(num, &x);
     clearByZero(&xNext);
     setInt(&two, 2);
@@ -1240,7 +1189,7 @@ int sqrtNumber(const Number *num, Number *result) {
         // xNext = (x + (num / x)) / 2
         divmod(num, &x, &tmp, &_);
         add(&x, &tmp, &tmp2);
-        divmodByInt(&tmp2, 2, &xNext, &rem);
+        divmod(&tmp2, &two, &xNext, &_);
 
         if (compNumber(&xNext, &x) == 0) break; // converge
         if (compNumber(&xNext, &xPrev) == 0) {  // oscillate
