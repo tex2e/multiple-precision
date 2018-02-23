@@ -16,8 +16,7 @@ int main(void) {
     Number num, numer;
     Number divisor, quot, remain, max;
     Number R_n;
-    Number one, two, zero, five;
-    digit_t rem;
+    Number one, two, zero, five, nine;
     bool isPrimeNumber;
 
     setInt(&base, 10 * 10);
@@ -25,6 +24,7 @@ int main(void) {
     setInt(&two, 2);
     setInt(&zero, 0);
     setInt(&five, 5);
+    setInt(&nine, 9);
 
     // R_2..R_18
     for (n = 2; n <= 18; n++) {
@@ -33,7 +33,7 @@ int main(void) {
 
         // R_n = (10^n - 1) / 9
         decrement(&base, &numer);
-        divmodByInt(&numer, 9, &R_n, &rem);
+        divmod(&numer, &nine, &R_n, &_);
 
         getStr(&R_n, result);
         printf("R_%d = %s", n, result);

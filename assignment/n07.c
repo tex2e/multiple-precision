@@ -20,15 +20,15 @@ int main(void) {
     int calcDigits = digits + extraDigits;
     Number tmp, _;
     Number n;
-    Number quot;
+    Number quot, rem;
     Number numer, denom; // numer/denom
     Number one, fortytwo, twentyfive;
     Number thirtysix, fortyeight, nineteen, two, six;
+    Number three;
     Number minusTwentyseven;
     Number denom1;
     Number result;
     Number prec;
-    digit_t rem;
     setInt(&one, 1);
     setInt(&fortytwo, 42);
     setInt(&twentyfive, 25);
@@ -39,6 +39,7 @@ int main(void) {
     setInt(&six, 6);
     setInt(&minusTwentyseven, -27);
     setInt(&denom1, 1);
+    setInt(&three, 3);
 
     clearByZero(&n);
     clearByZero(&result);
@@ -77,7 +78,7 @@ int main(void) {
         multiple(&denom1, &minusTwentyseven, &tmp); copyNumber(&tmp, &denom1);
     }
 
-    divmodByInt(&result, 3, &tmp, &rem); copyNumber(&tmp, &result); // result /= 3
+    divmod(&result, &three, &tmp, &rem); copyNumber(&tmp, &result); // result /= 3
 
     divBy10E(extraDigits, &result, &tmp); copyNumber(&tmp, &result);
 
