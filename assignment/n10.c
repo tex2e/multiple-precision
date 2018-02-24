@@ -11,27 +11,23 @@ int main(void) {
     Number p, p2;
     Number two;
     int sophieGermainPrimeCount = 0;
-
     setInt(&two, 2);
 
-    setInt(&p, UINT_MAX);
-    if (UINT_MAX % 2 == 0) {
-        // p should be odd number
-        increment(&p, &tmp); copyNumber(&tmp, &p);
-    }
+    // start from 10^10 + 1
+    setInt(&p, 1);
+    mulBy10E(10, &p, &tmp); copyNumber(&tmp, &p);
+    increment(&p, &tmp); copyNumber(&tmp, &p);
 
-    while (1) {
-        if (sophieGermainPrimeCount == 10) break;
-
+    // find Sophie Germain Primes
+    puts("Sophie Germain Primes:");
+    while (sophieGermainPrimeCount < 10) {
         if (isPrime(&p)) {
             // p2 = 2 * p + 1
             multiple(&p, &two, &p2);
             increment(&p2, &tmp); copyNumber(&tmp, &p2);
 
             if (isPrime(&p2)) {
-                printf("   p = "); dispNumberZeroSuppress(&p); putchar('\n');
-                printf("2p+1 = "); dispNumberZeroSuppress(&p2); putchar('\n');
-                printf("\n");
+                printf("p = "); dispNumberZeroSuppress(&p); putchar('\n');
                 sophieGermainPrimeCount++;
             }
         }
