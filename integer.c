@@ -810,8 +810,8 @@ int divmodKunthAlgorithmD(const Number *_a, const Number *_b, Number *q, Number 
     for (i = KETA - 1; b.n[i] == 0 && i >= 0; i--) {}
     t = i; // biMax
 
-    // use divmodByInt if b < RADIX
-    if (t == 0) {
+    // use divmodByInt if b < RADIX^2
+    if (t <= 1) {
         int r;
         digit_t divisor_;
         digit_t rem_;
