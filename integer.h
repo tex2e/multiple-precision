@@ -108,8 +108,10 @@ int factorizeNumber(const Number*, Number*, int);
 int factorialNumber(const Number*, Number*);
 int gcdNumber(const Number*, const Number*, Number*);
 int lcmNumber(const Number*, const Number*, Number*);
-int sqrtNumber(const Number*, Number*);
+int sqrtNumberInt(const Number*, Number*);
+int sqrtNumber(const Number*, int, Number*);
 int inverseNumber(const Number*, int, Number*);
+int inverseSqrtNumber(const Number*, int, Number*);
 int arctan(int, int, Number*);
 
 #endif

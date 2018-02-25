@@ -1020,7 +1020,7 @@ int factorizeNumber(const Number *_num, Number *factors, int maxFactors) {
     setInt(&four, 4);
     clearByZero(&remain);
 
-    sqrtNumber(&num, &max);
+    sqrtNumberInt(&num, &max);
 
     // 徐数列: 2,3,5,7,11,13,17,19,23,25,29,...
     // 最初の3項の次に 2 と 4 を交互に加えていったものを使用
@@ -1172,8 +1172,7 @@ int slowSqrtNumber(const Number *num, Number *result) {
 //             = (x_i / 2) + (N / (2 x_i))
 //             = (x_i + N / x_i) / 2
 //
-int sqrtNumber(const Number *num, Number *result) {
-    int i;
+int sqrtNumberInt(const Number *num, Number *result) {
     Number _;
     Number tmp, tmp2;
     Number xNext, x, xPrev;
@@ -1204,6 +1203,82 @@ int sqrtNumber(const Number *num, Number *result) {
 
     copyNumber(&xNext, result);
     return 0;
+}
+
+// result <- sqrt(num)
+//   where num >= 0
+// Return  0 if success
+// Return -1 if num < 0
+// Calculate sqrt(N) with Newton-Raphson method.
+int sqrtNumber(const Number *num, int prec, Number *result) {
+    int i;
+    int numLength, numd2Length;
+    Number tmp, _;
+    Number inverseNum;
+
+    for (i = KETA - 1; num->n[i] == 0 && i > 0; i--) {}
+    numLength = i * RADIX_LEN + log10(num->n[i]) + 1; // num's digit length
+    numd2Length = ceil(numLength / 2.0);
+
+    inverseSqrtNumber(num, prec, &inverseNum);
+    multiple(num, &inverseNum, result);
+    return numd2Length;
+}
+
+// result <- 1/sqrt(num) * 1e+prec
+//   where num >= 0
+// Return  0 if success
+// Return -1 if num < 0
+// Calculate 1/sqrt(N) with Newton-Raphson method.
+//   f(x)  = 1/x^2 - N
+//   f'(x) = -2/(x)^3
+//   Root-finding algorithm:
+//     x_{i+1} = x_i - f(x_i) / f'(x_i)
+//             = (x_i / 2) (3 - N (x_i)^2)
+//
+int inverseSqrtNumber(const Number *num, int prec, Number *result) {
+    int i;
+    int xNextLength, shift;
+    int numLength;
+    Number tmp, _;
+    Number term;
+    Number x, xNext, xPrev;
+    Number two, three, bigTwo, bigThree;
+    Number x2, nx2;
+    Number n = *num;
+    Number tmp1, tmp2, tmp3, tmp4;
+
+    for (i = KETA - 1; num->n[i] == 0 && i > 0; i--) {}
+    numLength = i * RADIX_LEN + ceil(log10(num->n[i])); // num's digit length
+
+    setInt(&two, 2);
+    setInt(&three, 3);
+
+    mulBy10E(prec, &three, &bigThree); // 3 * 10^prec
+    mulBy10E(prec - numLength - 1, &two, &x); // 2 * 10^(prec - num_length - 1)
+
+    while (1) {
+        // printf("%2d) ", j++); dispNumberZeroSuppress(&x); putchar('\n');
+
+        // nx2 = (&n * x**2) / 10**prec
+        multiple(&x, &x, &x2);
+        multiple(&n, &x2, &nx2);
+        divBy10E(prec, &nx2, &tmp); copyNumber(&tmp, &nx2);
+
+        // xNext = (x * (3 * 10**prec - nx2) / 2) / 10**prec
+        sub(&bigThree, &nx2, &tmp1);
+        multiple(&tmp1, &x, &tmp2); // tmp1 *= x
+        divmod(&tmp2, &two, &tmp3, &_); // term /= 2
+        divBy10E(prec, &tmp3, &xNext);
+
+        if (compNumber(&xNext, &x) == 0) break; // converge
+
+        // next
+        copyNumber(&xNext, &x);
+    }
+
+    copyNumber(&xNext, result);
+    return ceil(numLength / 2.0);
 }
 
 // result <- 1/num * 1e+expo
