@@ -25,8 +25,8 @@ def inverse_sqrt_integer(num, prec:)
   num_length = Math.log10(num).ceil
 
   f = Proc.new do |x|
-    left = (num * x**2) / 10**prec
-    res = (x * (3 * 10**prec - left) / 2) / 10**prec
+    nx2 = (num * x**2) / 10**prec
+    res = (x * (3 * 10**prec - nx2) / 2) / 10**prec
     res
   end
 
