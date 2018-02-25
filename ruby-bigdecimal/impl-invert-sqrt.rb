@@ -20,16 +20,18 @@ end
 
 # Calc 1/sqrt(num) with integer
 def inverse_sqrt_integer(num, prec:)
+  num_length = Math.log10(num).ceil
+  puts num_length
+
   f = Proc.new do |x|
     res = (x * (3 * 10**(prec*2) - num * x**2) / 2)
+    # 桁合わせ
     shift = res.to_s.length - prec
-    if shift > 0
-      res /= 10**shift
-    end
+    res /= 10**shift if shift > 0
     res
   end
 
-  x = 2
+  x = 2 * 10**(prec-1)
   puts "--- Integer ---"
   for i in 1..100
     puts "%2d) #{x}" % i
@@ -43,10 +45,10 @@ end
 N = 2
 inverse_sqrt_float(N)
 puts
-inverse_sqrt_integer(N, prec: 30)
+inverse_sqrt_integer(N, prec: 20)
 puts
 puts "--- Expected ---"
-num = BigDecimal("1") / BigDecimal("2").sqrt(30)
+num = BigDecimal("1") / BigDecimal("#{N}").sqrt(20)
 result = num.to_s("F") # Don't use exp format like 0.33e10
 puts "1/sqrt(#{N}) = #{result}"
 puts
