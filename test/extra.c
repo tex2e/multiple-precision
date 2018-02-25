@@ -6,14 +6,35 @@
     (!(expr) && printf("%s(%d): my_assert failed: "#expr"\n", \
     __FILE__, __LINE__))
 
+void test_sqrtNumber();
 void test_inverseNumber();
+void test_inverseSqrtNumber();
 void test_divmodKunthAlgorithmD();
 
 int main(void) {
+    test_sqrtNumber();
     test_inverseNumber();
+    test_inverseSqrtNumber();
     test_divmodKunthAlgorithmD();
 
     printf("Finish all tests.\n");
+}
+
+void test_sqrtNumber() {
+    printf("* test_sqrtNumber\n");
+    char* expected = "141421356237309504880";
+    char result[KETA * RADIX_LEN + 2];
+    int expo;
+    int expo_expected = 1;
+    Number tmp;
+    Number a, b;
+    setInt(&a, 2);
+    expo = sqrtNumber(&a, 20, &b);
+    getStr(&b, result);
+    // printf("expected = %s\n", expected);
+    // printf("result   = %s\n", result);
+    my_assert((strcmp(result, expected) == 0) && "test 1/sqrt(2)");
+    my_assert(expo == expo_expected && "test 1/sqrt(2) expo");
 }
 
 void test_inverseNumber() {
@@ -69,4 +90,18 @@ void test_divmodKunthAlgorithmD() {
         my_assert((strcmp(div_result, div_expected) == 0) && "test 12345E10 / 67890E5");
         my_assert((strcmp(mod_result, mod_expected) == 0) && "test 12345E10 %% 67890E5");
     }
+}
+
+void test_inverseSqrtNumber() {
+    printf("* test_inverseSqrtNumber\n");
+    char* expected = "70710678118654752440";
+    char result[KETA * RADIX_LEN + 2];
+    Number tmp;
+    Number a, b;
+    setInt(&a, 2);
+    inverseSqrtNumber(&a, 20, &b);
+    getStr(&b, result);
+    // printf("expected = %s\n", expected);
+    // printf("result   = %s\n", result);
+    my_assert((strcmp(result, expected) == 0) && "test 1/sqrt(2)");
 }
