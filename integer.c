@@ -780,7 +780,7 @@ int divmodKunthAlgorithmD(const Number *_a, const Number *_b, Number *q, Number 
     int s, t;
     int u;
     digit_t k_, qh_, rh_;
-    digit_t rem_;
+    Number rem;
     Number tmp, _;
     Number a = *_a;
     Number b = *_b;
@@ -812,13 +812,7 @@ int divmodKunthAlgorithmD(const Number *_a, const Number *_b, Number *q, Number 
 
     // use divmodByInt if b < RADIX^2
     if (t <= 1) {
-        int r;
-        digit_t divisor_;
-        digit_t rem_;
-        getInt(&b, &divisor_);
-        r = divmodPositiveNumberByInt(_a, divisor_, q, &rem_);
-        setInt(m, rem_);
-        return r;
+        return divmodPositiveNumber(_a, _b, q, m);
     }
 
     k_ = RADIX / (1 + b.n[t]);
@@ -889,7 +883,7 @@ int divmodKunthAlgorithmD(const Number *_a, const Number *_b, Number *q, Number 
     }
 
     // Calculate remainder.
-    divmodPositiveNumberByInt(&a, k_, m, &rem_);
+    divmodPositiveNumber(&a, &k, m, &rem);
 
     return 0;
 }
