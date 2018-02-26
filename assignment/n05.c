@@ -8,19 +8,33 @@
 #include "integer.h"
 
 int main(void) {
+    int i;
+    int digits = 1000;
+    int extraDigits = 20;
+    int calcDigits = digits + extraDigits;
+    int intPart;
+    char numStr[KETA * RADIX_LEN + 2];
     Number num, tmp, result;
 
-    // num = 2 * 10^2000
-    setInt(&num, 2);
-    mulBy10E(2000, &num, &tmp); copyNumber(&tmp, &num);
+    // num = 98765432100
+    setInt(&num, 987654321);
+    mulBy10E(2, &num, &tmp); copyNumber(&tmp, &num);
 
-    puts("sqrt(");
-    dispNumberZeroSuppress(&num); putchar('\n');
-    puts(")\n=");
+    getStr(&num, numStr);
+    printf("sqrt( %s ) = \n", numStr);
 
-    sqrtNumber(&num, &result); // result = sqrt(num)
+    intPart = sqrtNumber(&num, calcDigits, &result); // result = sqrt(num)
+
+    divBy10E(extraDigits, &result, &tmp); copyNumber(&tmp, &result);
 
     dispNumberZeroSuppress(&result); putchar('\n');
+
+    printf("Integer Part = ");
+    getStr(&result, numStr);
+    for (i = 0; i < intPart; i++) {
+        printf("%c", numStr[i]);
+    }
+    printf("\n");
 
     return 0;
 }
