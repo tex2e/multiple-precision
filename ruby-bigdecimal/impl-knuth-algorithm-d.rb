@@ -33,28 +33,28 @@ def divmod_kunthD(_a, _b, radix:)
     s = as.length - 1 + isFirst
     t = bs.length - 1
     as.append(0)
-    puts "as = #{as}, bs = #{bs}, s = #{s}, t = #{t}"
+    # puts "as = #{as}, bs = #{bs}, s = #{s}, t = #{t}"
     u = (as[s] < bs[t]) ? s - t - 1 : s - t;
     qh, rh = (as[s] * radix + as[s-1]).divmod( bs[t] )
 
     # q'b[t-1] > Dr' + a[s-2]
-    puts "adjustment"
-    puts "u = #{u}, qh = #{qh}, rh = #{rh}"
-    puts "left = #{qh * bs[t-1]}, right = #{radix * rh + as[s-2]}"
+    # puts "adjustment"
+    # puts "u = #{u}, qh = #{qh}, rh = #{rh}"
+    # puts "left = #{qh * bs[t-1]}, right = #{radix * rh + as[s-2]}"
     while rh < radix && qh * bs[t-1] > radix * rh + as[s-2]
       qh -= 1
       rh += bs[t]
-      puts "u = #{u}, qh = #{qh}, rh = #{rh}"
-      puts "left = #{qh * bs[t-1]}, right = #{radix * rh + as[s-2]}"
+      # puts "u = #{u}, qh = #{qh}, rh = #{rh}"
+      # puts "left = #{qh * bs[t-1]}, right = #{radix * rh + as[s-2]}"
     end
 
     qs[u] = qh
     a -= b * qh * radix**u
-    puts "aNext = #{a}"
+    # puts "aNext = #{a}"
     if a < 0
       qs[u] -= 1
       a += b * radix**u
-      puts "adjusted aNext = #{a}"
+      # puts "adjusted aNext = #{a}"
     end
 
     if u <= 0
