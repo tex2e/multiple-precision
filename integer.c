@@ -47,8 +47,7 @@ void dispNumberZeroSuppress(const Number *num) {
 
     printf("%c", sign);
     // skip zero digits
-    for (i = KETA - 1; num->n[i] == 0 && i != 0; i--)
-        ;
+    for (i = KETA - 1; num->n[i] == 0 && i != 0; i--) {}
 
     for (; i >= 0; i--) {
         printf(format, num->n[i]);
@@ -58,8 +57,7 @@ void dispNumberZeroSuppress(const Number *num) {
 // Set random number
 // num[0..digits] <- random
 void setRand(Number *num, int digits) {
-    int i;
-    int sign;
+    int i, sign;
 
     if (digits > KETA) {
         printf("setRand: digits > KETA\n\n");
@@ -129,8 +127,7 @@ int mulBy10(const Number *num, Number *result) {
 // Return -1 if exponent is less than 0
 // Return -2 if overflow the result
 int mulBy10E(int exponent, const Number *num, Number *result) {
-    int i;
-    int shiftCount, mulBy10Count;
+    int i, shiftCount, mulBy10Count;
     Number tmpResult;
 
     clearByZero(result);
@@ -295,8 +292,7 @@ void getStr(const Number *num, char* result) {
     strcat(str, sign);
 
     // skip zero digits
-    for (i = KETA - 1; num->n[i] == 0 && i != 0; i--)
-        ;
+    for (i = KETA - 1; num->n[i] == 0 && i != 0; i--) {}
 
     // Get first digit without 0 padding.
     sprintf(buffer, formatSuffix, num->n[i]);
@@ -329,8 +325,7 @@ int getSign(const Number *num) {
 // Return -1 if num > otherNum
 // Return  0 if num == otherNum
 int compNumber(const Number *num, const Number *otherNum) {
-    int i;
-    int sign;
+    int i, sign;
 
     // there are 4 cases
     //   1. +x `compare` +x  =>  compare each digit
@@ -530,9 +525,7 @@ int slowMultiplePositiveNumber(const Number *a, const Number *b, Number *result)
 // Return  0 if success
 // Return -1 if overflow
 int multiplePositiveNumber(const Number *a, const Number *b, Number *result) {
-    int i;
-    int ai, bi;
-    int aiMax, biMax;
+    int i, ai, bi, aiMax, biMax;
     int carry = 0;
     int r; // return value
     DIV_t divResult;
@@ -574,7 +567,6 @@ int multiplePositiveNumber(const Number *a, const Number *b, Number *result) {
     }
 
     copyNumber(&tmpResult, result);
-
     return 0;
 }
 
@@ -645,13 +637,11 @@ int slowDivmodPositiveNumber(const Number *_a, const Number *b, Number *q, Numbe
 // Return  0 if success
 // Return -1 if division by zero (b == 0)
 int divmodPositiveNumber(const Number *a, const Number *b, Number *q, Number *m) {
-    int i, j;
-    int iMax, jMax;
-    int next_;
+    int i, j, iMax, jMax, next_;
     Number tmp;
     Number num; // store a midway state of division
     Number divisor = *b;
-    Number division, remain;
+    Number quot, rem;
     Number result;
     Number next;
     Number digitMax;
@@ -671,8 +661,7 @@ int divmodPositiveNumber(const Number *a, const Number *b, Number *q, Number *m)
     setInt(&digitMax, RADIX);
     if (compNumber(&divisor, &digitMax) < 0) {
         int r;
-        digit_t divisor_;
-        digit_t rem_;
+        digit_t divisor_, rem_;
         getInt(&divisor, &divisor_);
         r = divmodPositiveNumberByInt(a, divisor_, q, &rem_);
         setInt(m, rem_);
@@ -690,12 +679,12 @@ int divmodPositiveNumber(const Number *a, const Number *b, Number *q, Number *m)
 
     for (i = iMax; i >= 0; i--) {
         for (j = jMax; j >= 0; j--) {
-            // num / divisor = division ... remain
-            // division is between 0 and 9.
+            // num / divisor = quot ... rem
+            // quot is between 0 and 9.
             // So, using slow divmod algorithm at this time is not problem.
-            slowDivmodPositiveNumber(&num, &divisor, &division, &remain);
+            slowDivmodPositiveNumber(&num, &divisor, &quot, &rem);
 
-            result.n[i] += division.n[0] * (digit_t)pow(10, j);
+            result.n[i] += quot.n[0] * (digit_t)pow(10, j);
 
             // break if last digit
             if (i == 0 && j == 0) break;
@@ -708,9 +697,9 @@ int divmodPositiveNumber(const Number *a, const Number *b, Number *q, Number *m)
             }
             setInt(&next, next_);
 
-            // num = remain * 10 + next
-            if (division.n[0] != 0) {
-                copyNumber(&remain, &num); // num = remain
+            // num = rem * 10 + next
+            if (quot.n[0] != 0) {
+                copyNumber(&rem, &num); // num = rem
             }
             mulBy10(&num, &tmp); copyNumber(&tmp, &num); // num *= 10
             add(&num, &next, &tmp); copyNumber(&tmp, &num); // num += next
@@ -718,7 +707,7 @@ int divmodPositiveNumber(const Number *a, const Number *b, Number *q, Number *m)
     }
 
     copyNumber(&result, q);
-    copyNumber(&remain, m);
+    copyNumber(&rem, m);
     return 0;
 }
 
@@ -727,9 +716,7 @@ int divmodPositiveNumber(const Number *a, const Number *b, Number *q, Number *m)
 // Return  0 if success
 // Return -1 if division by zero (b == 0)
 int divmodPositiveNumberByInt(const Number *a, digit_t b, Number *q, digit_t *m) {
-    int i, j;
-    int begin;
-    Number tmp;
+    int i, begin;
     digit_t num; // store a midway state of division
     digit_t divisor = b;
     digit_t division, remain;
@@ -776,21 +763,16 @@ int divmodPositiveNumberByInt(const Number *a, digit_t b, Number *q, digit_t *m)
 // Return  0 if success
 // Return -1 if division by zero (b == 0)
 int divmodKunthAlgorithmD(const Number *_a, const Number *_b, Number *q, Number *m) {
-    int i;
-    int s, t;
-    int u;
+    int i, s, t, u;
     digit_t k_, qh_, rh_;
-    Number rem;
     Number tmp, _;
+    Number term;
     Number a = *_a;
     Number b = *_b;
     Number k, radix;
-    Number numer, denom; // numer/denom
     Number qh, rh;
-    Number leftside, rightside;
-    Number term, term1, term2;
+    Number numer, denom; // numer/denom
     Number one;
-    Number digitMax;
     DIV_t divResult;
 
     setInt(&radix, RADIX);
@@ -820,10 +802,6 @@ int divmodKunthAlgorithmD(const Number *_a, const Number *_b, Number *q, Number 
     multiple(&a, &k, &tmp); copyNumber(&tmp, &a);
     multiple(&b, &k, &tmp); copyNumber(&tmp, &b);
 
-    // printf("\n\n=====\n");
-    // printf("k = "); dispNumberZeroSuppress(&k); putchar('\n');
-    // printf("a = "); dispNumberZeroSuppress(&a); putchar('\n');
-
     // Calculate quotient.
     int isFirst = 1;
     while (1) {
@@ -831,28 +809,18 @@ int divmodKunthAlgorithmD(const Number *_a, const Number *_b, Number *q, Number 
         s = i; // aiMax
         s += isFirst;
 
-        // printf("a = "); dispNumberZeroSuppress(&a); putchar('\n');
-        // printf("b = "); dispNumberZeroSuppress(&b); putchar('\n');
-        // printf("s = %d, t = %d\n", s, t);
-
         u = (a.n[s] < b.n[t]) ? s - t - 1 : s - t;
-        // printf("qh, rh = divmod(%ld, %ld)\n", a.n[s] * RADIX + a.n[s-1], b.n[t]);
         divResult = DIV(a.n[s] * RADIX + a.n[s-1], b.n[t]);
         qh_ = divResult.quot; // qh = (a.n[s] * RADIX + a.n[s-1]) / b.n[t];
         rh_ = divResult.rem;  // rh = (a.n[s] * RADIX + a.n[s-1]) % b.n[t];
 
         // q' b[t-1] > D r' + a[s-2]
-        // printf("adjustment\n");
-        // printf("u = %d, qh = %ld, rh = %ld\n", u, qh_, rh_);
         while (rh_ < RADIX && qh_ * b.n[t-1] > RADIX * rh_ + a.n[s-2]) {
             qh_ -= 1;
             rh_ += b.n[t];
-            // printf("u = %d, qh = %ld, rh = %ld\n", u, qh_, rh_);
         }
 
         q->n[u] = qh_;
-        // printf("u = %d, qh = %ld\n", u, qh_);
-        // printf("q = "); dispNumberZeroSuppress(q); putchar('\n');
 
         // a -= b * qh * radix^u
         Number b_radix_u; // b * radix^u
@@ -863,9 +831,7 @@ int divmodKunthAlgorithmD(const Number *_a, const Number *_b, Number *q, Number 
         sub(&a, &term, &tmp); copyNumber(&tmp, &a);
         if (getSign(&a) == -1) {
             q->n[u] -= 1;
-            // printf("aNext = "); dispNumberZeroSuppress(&a); putchar('\n');
             add(&a, &b_radix_u, &tmp); copyNumber(&tmp, &a);
-            // printf("adjusted aNext = "); dispNumberZeroSuppress(&a); putchar('\n');
         }
         if (getSign(&a) == -1) {
             fprintf(stderr, "divmodKunthAlgorithmD: something get wrong.\n");
@@ -876,15 +842,12 @@ int divmodKunthAlgorithmD(const Number *_a, const Number *_b, Number *q, Number 
             return -1;
         }
 
-        // printf("u = %d\n", u);
         if (u <= 0) break;
-        // puts("---");
         isFirst = 0;
     }
 
     // Calculate remainder.
-    divmodPositiveNumber(&a, &k, m, &rem);
-
+    divmodPositiveNumber(&a, &k, m, &_);
     return 0;
 }
 
@@ -1167,9 +1130,8 @@ int slowSqrtNumber(const Number *num, Number *result) {
 //             = (x_i + N / x_i) / 2
 //
 int sqrtNumberInt(const Number *num, Number *result) {
-    Number _;
-    Number tmp, tmp2;
-    Number xNext, x, xPrev;
+    Number tmp, tmp2, _;
+    Number x, xNext, xPrev;
     Number two;
     copyNumber(num, &x);
     clearByZero(&xNext);
@@ -1205,8 +1167,7 @@ int sqrtNumberInt(const Number *num, Number *result) {
 // Return -1 if num < 0
 // Calculate sqrt(N) with Newton-Raphson method.
 int sqrtNumber(const Number *num, int prec, Number *result) {
-    int i;
-    int numLength, numd2Length;
+    int i, numLength, numd2Length;
     Number tmp, _;
     Number inverseNum;
 
@@ -1231,16 +1192,13 @@ int sqrtNumber(const Number *num, int prec, Number *result) {
 //             = (x_i / 2) (3 - N (x_i)^2)
 //
 int inverseSqrtNumber(const Number *num, int prec, Number *result) {
-    int i;
-    int xNextLength, shift;
-    int numLength;
+    int i, numLength;
     Number tmp, _;
-    Number term;
     Number x, xNext, xPrev;
-    Number two, three, bigTwo, bigThree;
+    Number two, three, bigThree;
     Number x2, nx2;
     Number n = *num;
-    Number tmp1, tmp2, tmp3, tmp4;
+    Number tmp1, tmp2, tmp3;
 
     for (i = KETA - 1; num->n[i] == 0 && i > 0; i--) {}
     numLength = i * RADIX_LEN + ceil(log10(num->n[i])); // num's digit length
@@ -1252,8 +1210,6 @@ int inverseSqrtNumber(const Number *num, int prec, Number *result) {
     mulBy10E(prec - numLength - 1, &two, &x); // 2 * 10^(prec - num_length - 1)
 
     while (1) {
-        // printf("%2d) ", j++); dispNumberZeroSuppress(&x); putchar('\n');
-
         // nx2 = (n * x**2) / 10**prec
         multiple(&x, &x, &x2);
         multiple(&n, &x2, &nx2);
@@ -1286,10 +1242,9 @@ int inverseSqrtNumber(const Number *num, int prec, Number *result) {
 //
 int inverseNumber(const Number *num, int prec, Number *result) {
     int i, numLength;
-    int left, right;
     Number tmp;
     Number x, xNext;
-    Number term, term1, term2;
+    Number term, term2;
     Number two, bigTwo;
     clearByZero(result);
 
@@ -1306,7 +1261,6 @@ int inverseNumber(const Number *num, int prec, Number *result) {
         sub(&bigTwo, &term2, &term);
         multiple(&x, &term, &xNext);
         divBy10E(prec, &xNext, &tmp); copyNumber(&tmp, &xNext);
-        // printf("xNext_%d = ", i++); dispNumberZeroSuppress(&xNext); putchar('\n');
 
         // if (validDigits > prec) break;
         if (compNumber(&xNext, &x) == 0) break; // converge
@@ -1326,11 +1280,11 @@ int inverseNumber(const Number *num, int prec, Number *result) {
 //           ans = 1/1(1/x)^1 - 1/3(1/x)^3 + 1/5(1/x)^5 - 1/7(1/x)^7 + ...
 //   10^1100 ans = 10^1100/1(1/x)^1 - 10^1100/3(1/x)^3 + 10^1100/5(1/x)^5 - ...
 //
-int arctan(int x, int digits, Number *result) {
+int arctan(int x_, int digits, Number *result) {
     int i;
     int sign;
     Number tmp, _;
-    Number x_;
+    Number x;
     Number step, quot;
     Number numer, denom; // numer/denom
     Number denom1, denom2;
@@ -1344,10 +1298,10 @@ int arctan(int x, int digits, Number *result) {
     mulBy10E(digits, &one, &numer); // numer = 1e+digits
 
     sign = 1;
-    setInt(&x_, x);
-    multiple(&x_, &x_, &step); // step = x * x
+    setInt(&x, x_);
+    multiple(&x, &x, &step); // step = x * x
     setInt(&denom1, 1);
-    setInt(&denom2, x);
+    setInt(&denom2, x_);
     copyNumber(&denom2, &denom); // denom = 1 * x
     while (1) {
         if (compNumber(&denom, &numer) > 0) break;
@@ -1362,6 +1316,5 @@ int arctan(int x, int digits, Number *result) {
     }
 
     copyNumber(&sum, result);
-
     return 0;
 }
