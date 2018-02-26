@@ -1254,7 +1254,7 @@ int inverseSqrtNumber(const Number *num, int prec, Number *result) {
     while (1) {
         // printf("%2d) ", j++); dispNumberZeroSuppress(&x); putchar('\n');
 
-        // nx2 = (&n * x**2) / 10**prec
+        // nx2 = (n * x**2) / 10**prec
         multiple(&x, &x, &x2);
         multiple(&n, &x2, &nx2);
         divBy10E(prec, &nx2, &tmp); copyNumber(&tmp, &nx2);
@@ -1275,8 +1275,7 @@ int inverseSqrtNumber(const Number *num, int prec, Number *result) {
     return ceil(numLength / 2.0);
 }
 
-// result <- 1/num * 1e+expo
-// Return expo where expo > prec
+// result <- 1/num * 1e+prec
 // Calculate 1/N with Newton-Raphson method.
 //   1/N = x  ->  1/x - N = 0
 //   f(x)  = 1/x - N
@@ -1286,43 +1285,36 @@ int inverseSqrtNumber(const Number *num, int prec, Number *result) {
 //             = x_n (2 - N (x_n)^2)
 //
 int inverseNumber(const Number *num, int prec, Number *result) {
-    int i, maxKeta;
+    int i, numLength;
     int left, right;
-    int expo;
     Number tmp;
     Number x, xNext;
     Number term, term1, term2;
-    Number two;
-    setInt(&two, 2);
+    Number two, bigTwo;
     clearByZero(result);
 
-    for (i = KETA - 1; num->n[i] == 0 && i >= 0; i--) {}
-    if (i < 0) return -1;
-    maxKeta = i;
-    expo = maxKeta * RADIX_LEN + log10(num->n[i]) + 1;
+    for (i = KETA - 1; num->n[i] == 0 && i > 0; i--) {}
+    numLength = i * RADIX_LEN + ceil(log10(num->n[i])) + 1; // num's digit length
 
-    setInt(&x, 2);
-
-    int validDigits = 3; // TODO: valid digits may vary. this is not good
+    setInt(&two, 2);
+    mulBy10E(prec, &two, &bigTwo); // 2 * 10^(prec)
+    mulBy10E(prec - numLength - 1, &two, &x); // 2 * 10^(prec - num_length - 1)
 
     while (1) {
         // x_{n+1} = x_n (2 - N x_n)
         multiple(num, &x, &tmp); copyNumber(&tmp, &term2);
-        mulBy10E(expo, &two, &term1);
-        sub(&term1, &term2, &term);
+        sub(&bigTwo, &term2, &term);
         multiple(&x, &term, &xNext);
+        divBy10E(prec, &xNext, &tmp); copyNumber(&tmp, &xNext);
         // printf("xNext_%d = ", i++); dispNumberZeroSuppress(&xNext); putchar('\n');
 
-        if (validDigits > prec) break;
-
-        copyNumber(&xNext, &x);
+        // if (validDigits > prec) break;
+        if (compNumber(&xNext, &x) == 0) break; // converge
 
         // next
-        expo *= 2;
-        validDigits *= 2;
+        copyNumber(&xNext, &x);
     }
-    divBy10E(expo * 2 - prec, &xNext, result);
-
+    copyNumber(&xNext, result);
     return 0;
 }
 
