@@ -15,6 +15,7 @@ n07.exe: MACROS = -D KETA='(1000/RADIX_LEN+10)'
 n08.exe: MACROS = -D KETA='(50/RADIX_LEN)'
 n09.exe: MACROS = -D KETA='(1000/RADIX_LEN+10)'
 n10.exe: MACROS = -D KETA='(50/RADIX_LEN)'
+x02.exe: MACROS = -D KETA='(10100/RADIX_LEN+10)'
 
 %.exe: %.c ../integer.c ../integer.h Makefile
 	gcc -O3 $(MACROS) -c ../integer.c -o $(basename $<)-integer.o
