@@ -68,8 +68,8 @@ i の初期値は a の最上位桁の位置です。
 
 num = a.n[i]; // 作業用変数num
 for (; i >= 0; i--) {
-    quot = num / divisor;
-    rem  = num % divisor;
+    quot = num / b;
+    rem  = num % b;
     q.n[i] = quot;
     if (i == 0) break;
 
