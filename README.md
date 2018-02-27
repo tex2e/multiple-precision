@@ -269,7 +269,7 @@ sqrt3 = 3 * inverse_sqrt(3, prec: 30)
 時は経ち本科卒業目前、資源ごみとして捨てられていた多倍長演算のレポートを読んでみたところ、多倍長演算の高速化欲が再燃。
 2016年1月に出された全課題（N = 0..10）を解きつつ、今まで作ったプログラム群を改良していきました。
 3Jの時は Kunth先生の除算アルゴリズムを実装していなかったので、それを実装して処理速度が10倍くらい速くなりました。
-約1万円で買った本「The Art of Computer Programming Seminumerical Algorithms 日本語訳」
+私事ですが、約1万円で買った本「The Art of Computer Programming Seminumerical Algorithms 日本語訳」
 が4年の時を得てやっと役に立てることができたことが個人的には嬉しい限りです。
 
 長野高専の3Jで多倍長演算を学ぶ学生にこのレポジトリが目に留まれば幸いです。Happy Coding!
