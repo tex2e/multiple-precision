@@ -11,10 +11,8 @@ def divmod_kunthD(_a, _b, radix:)
   a, b = _a, _b
 
   radix_len = Math.log10(radix).to_i
-  as = a.to_s.reverse.scan(/.{1,#{radix_len}}/)
-    .map(&:reverse).map(&:to_i)
-  bs = b.to_s.reverse.scan(/.{1,#{radix_len}}/)
-    .map(&:reverse).map(&:to_i)
+  as = a.to_s.reverse.scan(/.{1,#{radix_len}}/).map(&:reverse).map(&:to_i)
+  bs = b.to_s.reverse.scan(/.{1,#{radix_len}}/).map(&:reverse).map(&:to_i)
   qs = [] # ans
   s = as.length - 1
   t = bs.length - 1
@@ -22,14 +20,12 @@ def divmod_kunthD(_a, _b, radix:)
   k = radix / (bs[t] + 1)
   a *= k
   b *= k
-  puts "k = #{k}"
+  # puts "k = #{k}"
 
   isFirst = 1
-  while 1
-    as = a.to_s.reverse.scan(/.{1,#{radix_len}}/)
-      .map(&:reverse).map(&:to_i)
-    bs = b.to_s.reverse.scan(/.{1,#{radix_len}}/)
-      .map(&:reverse).map(&:to_i)
+  while true
+    as = a.to_s.reverse.scan(/.{1,#{radix_len}}/).map(&:reverse).map(&:to_i)
+    bs = b.to_s.reverse.scan(/.{1,#{radix_len}}/).map(&:reverse).map(&:to_i)
     s = as.length - 1 + isFirst
     t = bs.length - 1
     as.append(0)
