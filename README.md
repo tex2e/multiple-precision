@@ -138,10 +138,11 @@ def divmod_kunthD(_a, _b, radix:)
   isFirst = 1
   while true
     # a,bを基数の桁数で分割する
-    as = a.to_s.reverse.scan(/.{1,#{radix_len}}/).map(&:reverse).map(&:to_i).append(0)
+    as = a.to_s.reverse.scan(/.{1,#{radix_len}}/).map(&:reverse).map(&:to_i)
     bs = b.to_s.reverse.scan(/.{1,#{radix_len}}/).map(&:reverse).map(&:to_i)
     s = as.length - 1 + isFirst
     t = bs.length - 1
+    as.append(0)
     u = (as[s] < bs[t]) ? s - t - 1 : s - t;
     qh, rh = (as[s] * radix + as[s-1]).divmod( bs[t] )
 
